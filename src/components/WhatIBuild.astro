@@ -1,0 +1,50 @@
+---
+const pillars = [
+  {
+    icon: '🔧',
+    title: 'End-to-End Data Pipelines',
+    description:
+      'High-throughput ingestion (Kafka, 2B+ events/month) through analytics-ready layers using dbt, Star schemas, and dimensional modeling. Built for reliability and observability.',
+  },
+  {
+    icon: '☁️',
+    title: 'Cloud Data Platforms',
+    description:
+      'AWS-native architectures (Glue, Athena, EMR, S3) and modern data stacks (Snowflake, Databricks, DuckDB). Designed for scale, cost-efficiency, and developer experience.',
+  },
+  {
+    icon: '📊',
+    title: 'Analytics & BI',
+    description:
+      'Executive dashboards, D3.js data stories, and self-serve reporting that cuts insight generation from days to minutes. I design for the end user, not just the data model.',
+  },
+  {
+    icon: '🤖',
+    title: 'ML-Enabling Infrastructure',
+    description:
+      'Feature pipelines and data layers that power real-time ML inference — from health wearable telemetry at 10M+ user scale to high-frequency sensor research at 200Hz.',
+  },
+];
+---
+
+<section class="py-24 px-6 border-t border-[#2d2d2f]">
+  <div class="max-w-6xl mx-auto">
+
+    <p class="reveal text-accent text-sm font-medium uppercase tracking-widest mb-4">Capabilities</p>
+    <h2 class="reveal text-4xl font-bold text-[#f5f5f7] mb-16">What I Build</h2>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      {pillars.map((p, i) => (
+        <div
+          class="reveal bg-[#1c1c1e] border border-[#2d2d2f] rounded-2xl p-8 hover:border-[#3d3d3f] transition-colors duration-300"
+          style={`animation-delay:${i * 0.1}s`}
+        >
+          <div class="text-3xl mb-4">{p.icon}</div>
+          <h3 class="text-[#f5f5f7] font-semibold text-lg mb-3">{p.title}</h3>
+          <p class="text-[#6e6e73] text-sm leading-relaxed">{p.description}</p>
+        </div>
+      ))}
+    </div>
+
+  </div>
+</section>

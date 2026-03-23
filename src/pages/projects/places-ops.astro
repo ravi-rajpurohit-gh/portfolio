@@ -1,0 +1,171 @@
+---
+import CaseStudy from '../../layouts/CaseStudy.astro';
+
+const diagArch = `flowchart LR
+    A["🐍 Python Script\\ngenerate_mock_data.py"] -->|"generates 3 CSVs"| B[/"raw_data/\\nvendors.csv\\nprojects.csv\\nexpenses.csv"/]
+    B -->|"read_csv_auto()"| C["⚙️ dbt-core\\ndbt build"]
+    C -->|"materializes tables"| D[("🦆 DuckDB\\nplaces_database.duckdb")]
+    C -->|"writes artifacts"| E[/"run_results.json\\nmanifest.json"/]
+    D -->|"query"| F["🎯 Streamlit App\\napp.py"]
+    E -->|"parse"| F
+    F --> G["Tab 1: Operations\\nCapEx Dashboard"]
+    F --> H["Tab 2: Pipeline Health\\nEngineering View"]
+    F --> I["Tab 3: Data Dictionary\\nAuto-generated"]`;
+
+const diagER = `erDiagram
+    STG_PROJECTS {
+        int project_id PK
+        string project_name
+        string campus
+        float budget_allocated
+        string status
+    }
+    STG_VENDORS {
+        int vendor_id PK
+        string vendor_name
+        int reliability_score
+    }
+    STG_EXPENSES {
+        int expense_id PK
+        int project_id FK
+        int vendor_id FK
+        date expense_date
+        float amount
+        string category
+    }
+    FCT_PROJECT_SPEND {
+        int expense_id PK
+        date expense_date
+        float amount
+        string category
+        string project_name
+        string campus
+        string status
+        float budget_allocated
+        string vendor_name
+        int reliability_score
+    }
+    STG_PROJECTS ||--o{ STG_EXPENSES : "project_id"
+    STG_VENDORS ||--o{ STG_EXPENSES : "vendor_id"
+    STG_EXPENSES ||--|| FCT_PROJECT_SPEND : "materialized into"`;
+
+const diagLineage = `flowchart TD
+    V[/"vendors.csv"/] --> S1["stg_vendors\\nvendor_id · vendor_name\\nreliability_score"]
+    P[/"projects.csv"/] --> S2["stg_projects\\nproject_id · project_name\\ncampus · budget · status"]
+    E[/"expenses.csv"/] --> S3["stg_expenses\\nexpense_id · project_id\\nvendor_id · date · amount · category"]
+    S1 --> F["fct_project_spend\\n— Denormalized fact table\\n— Used by all 3 dashboard tabs"]
+    S2 --> F
+    S3 --> F
+    style F fill:#2997ff,color:#fff,stroke:#0077ed`;
+---
+
+<CaseStudy
+  title="PlacesOps"
+  subtitle="An end-to-end BI dashboard and pipeline monitoring prototype built on a modern data stack — DuckDB, dbt-core, and Streamlit. Designed to serve two audiences simultaneously: business stakeholders and data engineers."
+  tags={['dbt', 'DuckDB', 'Streamlit', 'Python', 'SQL', 'Altair']}
+  liveUrl="https://places-ops.streamlit.app/"
+  githubUrl="https://github.com/ravi-rajpurohit-gh/apple_places"
+>
+
+  <div class="cs-section">
+    <h2>Overview</h2>
+    <p>
+      Most BI tools force a tradeoff: build for business users and lose engineering visibility,
+      or build for engineers and lose stakeholder usability. PlacesOps explores whether a single
+      application can serve both audiences well.
+    </p>
+    <p>
+      The domain simulates Apple Places — facilities construction tracking across campuses
+      (Apple Park, Infinite Loop, Austin Campus, Culver City). The pipeline ingests mock relational
+      data, transforms it through a dbt DAG, persists it in DuckDB, and serves it through a
+      three-tab Streamlit application.
+    </p>
+  </div>
+
+  <div class="cs-section">
+    <h2>System Architecture</h2>
+    <p>Data flows from Python-generated CSVs through dbt transformations into DuckDB, then served by Streamlit.</p>
+    <pre class="mermaid" set:text={diagArch}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Data Model</h2>
+    <p>
+      Three staging models — one per source CSV — feed into a single denormalized fact table.
+      The staging layer handles type casting and renaming. The mart layer joins all three
+      into an analytics-ready dataset served by the dashboard.
+    </p>
+    <pre class="mermaid" set:text={diagER}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>dbt Model Lineage</h2>
+    <p>
+      Three staging models ingest directly from raw CSV files using DuckDB's
+      <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">read_csv_auto()</code>.
+      The mart model joins all three and is the single source of truth for the Streamlit app.
+      dbt tests — <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">unique</code>,
+      <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">not_null</code>,
+      <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">accepted_values</code> —
+      run on every build and surface in Tab 2 via <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">run_results.json</code>.
+    </p>
+    <pre class="mermaid" set:text={diagLineage}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Key Engineering Decisions</h2>
+
+    <div class="adr-card">
+      <span class="decision">Decision #1 — Storage</span>
+      <h3>Why DuckDB over PostgreSQL or SQLite?</h3>
+      <p>
+        This dashboard is analytics-first — every query is an aggregation (GROUP BY campus, SUM by category, trend by date).
+        DuckDB is purpose-built for columnar OLAP workloads and runs these significantly faster than row-oriented PostgreSQL.
+        It's embedded and serverless: no infrastructure to provision, no connection pooling to manage.
+        DuckDB's native <code style="color:#2997ff;">read_csv_auto()</code> also eliminates the need for a
+        separate ingestion step — dbt models read directly from CSV files, keeping the pipeline minimal.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #2 — Transformation</span>
+      <h3>Why dbt-core over raw SQL scripts or pandas?</h3>
+      <p>
+        Raw SQL scripts are untestable, undocumented, and unversioned. dbt turns transformations into a
+        tested, lineage-tracked DAG. The key unlock was the artifact outputs:
+        <code style="color:#2997ff;">run_results.json</code> exposes model execution times and test pass/fail
+        status — which powers Tab 2 (Pipeline Health) entirely. The
+        <code style="color:#2997ff;">manifest.json</code> auto-populates Tab 3 (Data Dictionary),
+        keeping documentation permanently in sync with the codebase. Neither is possible with ad-hoc scripts.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #3 — Serving</span>
+      <h3>Why Streamlit over Tableau or Power BI?</h3>
+      <p>
+        The dual-audience requirement made BI tools non-viable. Tableau cannot parse dbt's JSON artifacts
+        or conditionally render engineering-level metadata. Streamlit is code-first — the entire dashboard
+        is version-controlled alongside the pipeline, and Python gives full access to Pandas styling,
+        Altair charts, and custom logic. For a prototype demonstrating the full data stack in one repo,
+        Streamlit is the right call.
+      </p>
+    </div>
+  </div>
+
+  <div class="cs-section">
+    <h2>Outcome & Reflection</h2>
+    <p>
+      The most interesting design challenge was making the same dataset feel right for two very different audiences.
+      The business tab needed KPI cards and clean charts. The engineering tab needed raw execution
+      telemetry and color-coded test results. A single <code style="color:#2997ff;">fct_project_spend</code>
+      table serves both — the intelligence lives in how Streamlit queries and presents it per tab.
+    </p>
+    <p>
+      The dbt artifact integration — reading <code style="color:#2997ff;">run_results.json</code> and
+      <code style="color:#2997ff;">manifest.json</code> at runtime — is the pattern I'd carry into any
+      production data platform to surface pipeline health directly to the people who need to act on it.
+    </p>
+  </div>
+
+</CaseStudy>

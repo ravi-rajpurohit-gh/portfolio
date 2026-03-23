@@ -1,0 +1,120 @@
+---
+const projects = [
+  {
+    title: 'PlacesOps',
+    subtitle: 'BI Dashboard & Modern Data Stack Prototype',
+    description:
+      'End-to-end data pipeline and monitoring dashboard simulating a modern data stack for facilities & operations management. Dual view: a capital expenditure dashboard for business stakeholders and a dbt pipeline health monitor for data engineers.',
+    tags: ['dbt', 'DuckDB', 'Streamlit', 'Python', 'SQL'],
+    gradient: 'from-blue-600 to-purple-700',
+    liveUrl: 'https://places-ops.streamlit.app/',
+    caseStudyUrl: '/projects/places-ops',
+    hasCaseStudy: true,
+  },
+  {
+    title: 'App Store Ecosystem Analytics',
+    subtitle: 'Interactive Data Storytelling with D3.js',
+    description:
+      'Transformed 500MB of raw Kaggle data into a silky-smooth 50KB interactive bar chart race visualizing 13 years of App Store genre trends. Published on Medium and featured on LinkedIn.',
+    tags: ['D3.js', 'Python', 'Pandas', 'HTML/CSS'],
+    gradient: 'from-orange-500 to-red-600',
+    mediumUrl: 'https://ravi-rajpurohit.medium.com/the-genre-wars-how-i-visualized-13-years-of-app-store-history-without-crashing-your-browser-f56817e2b52d',
+    caseStudyUrl: '/projects/app-store-trends',
+    hasCaseStudy: true,
+  },
+  {
+    title: 'Uber NYC Dashboard',
+    subtitle: 'Geospatial Analytics Dashboard',
+    description:
+      'Interactive geospatial analytics dashboard exploring Uber pickup and dropoff patterns across New York City. Features neighborhood-level analysis, time-based filtering, and statistical insights.',
+    tags: ['Streamlit', 'Pandas', 'NumPy', 'Python'],
+    gradient: 'from-emerald-600 to-teal-700',
+    liveUrl: 'https://uber-nyc-dashboard.streamlit.app/',
+    hasCaseStudy: false,
+  },
+  {
+    title: 'ChatPilot',
+    subtitle: 'Multi-Provider AI Chat Application',
+    description:
+      'Versatile AI chat application supporting multiple LLM providers (Gemini, OpenAI) with a clean Streamlit interface. Actively developed with planned model switching and prompt memory features.',
+    tags: ['Streamlit', 'Gemini API', 'OpenAI API', 'Python'],
+    gradient: 'from-violet-600 to-pink-700',
+    githubUrl: 'https://github.com/ravi-rajpurohit-gh/chat-pilot',
+    hasCaseStudy: false,
+  },
+];
+---
+
+<section id="work" class="py-24 px-6 border-t border-[#2d2d2f]">
+  <div class="max-w-6xl mx-auto">
+
+    <p class="reveal text-accent text-sm font-medium uppercase tracking-widest mb-4">Work</p>
+    <h2 class="reveal text-4xl font-bold text-[#f5f5f7] mb-4">Featured Projects</h2>
+    <p class="reveal text-[#6e6e73] mb-16 max-w-xl">
+      Projects with a Case Study include architecture diagrams, data models, and the key engineering decisions behind them.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      {projects.map((p, i) => (
+        <div
+          class="reveal bg-[#1c1c1e] border border-[#2d2d2f] rounded-2xl overflow-hidden hover:border-[#3d3d3f] transition-all duration-300 hover:-translate-y-1 flex flex-col"
+          style={`animation-delay:${i * 0.1}s`}
+        >
+          <!-- Gradient preview -->
+          <div class={`h-40 bg-gradient-to-br ${p.gradient} flex items-center justify-center`}>
+            <span class="text-white text-xl font-bold opacity-60">{p.title}</span>
+          </div>
+
+          <div class="p-6 flex flex-col flex-1">
+            <h3 class="text-[#f5f5f7] font-semibold text-lg mb-1">{p.title}</h3>
+            <p class="text-accent text-xs font-medium mb-3">{p.subtitle}</p>
+            <p class="text-[#6e6e73] text-sm leading-relaxed mb-4 flex-1">{p.description}</p>
+
+            <div class="flex flex-wrap gap-2 mb-5">
+              {p.tags.map(tag => <span class="badge">{tag}</span>)}
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+              {p.hasCaseStudy && (
+                <a
+                  href={p.caseStudyUrl}
+                  class="bg-accent hover:bg-[#0077ed] text-white text-sm font-medium px-4 py-2 rounded-full transition-colors"
+                >
+                  Case Study →
+                </a>
+              )}
+              {p.liveUrl && (
+                <a
+                  href={p.liveUrl}
+                  target="_blank"
+                  class="border border-[#2d2d2f] hover:border-[#6e6e73] text-[#a1a1a6] hover:text-[#f5f5f7] text-sm font-medium px-4 py-2 rounded-full transition-colors"
+                >
+                  Live Demo
+                </a>
+              )}
+              {p.mediumUrl && (
+                <a
+                  href={p.mediumUrl}
+                  target="_blank"
+                  class="border border-[#2d2d2f] hover:border-[#6e6e73] text-[#a1a1a6] hover:text-[#f5f5f7] text-sm font-medium px-4 py-2 rounded-full transition-colors"
+                >
+                  Medium
+                </a>
+              )}
+              {p.githubUrl && (
+                <a
+                  href={p.githubUrl}
+                  target="_blank"
+                  class="border border-[#2d2d2f] hover:border-[#6e6e73] text-[#a1a1a6] hover:text-[#f5f5f7] text-sm font-medium px-4 py-2 rounded-full transition-colors"
+                >
+                  GitHub
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,75 @@
+---
+const articles = [
+  {
+    title: 'The "Genre Wars": How I Visualized 13 Years of App Store History (Without Crashing Your Browser)',
+    summary:
+      'A Data Engineer\'s guide to turning 500MB of raw logs into a silky-smooth 50KB data story using Python and D3.js. Covers pre-aggregation strategy, D3.js animation architecture, and performance optimization.',
+    date: 'Jan 2025',
+    readTime: '8 min read',
+    url: 'https://ravi-rajpurohit.medium.com/the-genre-wars-how-i-visualized-13-years-of-app-store-history-without-crashing-your-browser-f56817e2b52d',
+    tag: 'Data Visualization',
+    gradient: 'from-orange-500 to-red-600',
+  },
+  {
+    title: 'Exploring the Relationship Between PPG Data and Heart Rate Variability',
+    summary:
+      'An investigation into using PPG-based HRV tracking to monitor stress and recovery. Covers signal processing, data pipeline design for biosensor streams, and insights from real wearable data.',
+    date: 'Oct 2024',
+    readTime: '6 min read',
+    url: 'https://ravi-rajpurohit.medium.com/',
+    tag: 'Data Engineering',
+    gradient: 'from-blue-600 to-cyan-600',
+  },
+];
+---
+
+<section id="writing" class="py-24 px-6 border-t border-[#2d2d2f]">
+  <div class="max-w-6xl mx-auto">
+
+    <p class="reveal text-accent text-sm font-medium uppercase tracking-widest mb-4">Writing</p>
+    <h2 class="reveal text-4xl font-bold text-[#f5f5f7] mb-4">Technical Writing</h2>
+    <p class="reveal text-[#6e6e73] mb-16 max-w-xl">
+      I write about data engineering patterns, visualization architecture, and lessons from building real systems.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      {articles.map((a, i) => (
+        <a
+          href={a.url}
+          target="_blank"
+          class="reveal block bg-[#1c1c1e] border border-[#2d2d2f] rounded-2xl overflow-hidden hover:border-[#3d3d3f] transition-all duration-300 hover:-translate-y-1 group"
+          style={`animation-delay:${i * 0.1}s`}
+        >
+          <div class={`h-28 bg-gradient-to-br ${a.gradient} flex items-end p-4`}>
+            <span class="text-white/80 text-xs font-medium bg-black/30 px-2 py-1 rounded-full">{a.tag}</span>
+          </div>
+          <div class="p-6">
+            <h3 class="text-[#f5f5f7] font-semibold text-base leading-snug mb-3 group-hover:text-accent transition-colors">
+              {a.title}
+            </h3>
+            <p class="text-[#6e6e73] text-sm leading-relaxed mb-4">{a.summary}</p>
+            <div class="flex items-center justify-between">
+              <div class="flex gap-3 text-xs text-[#6e6e73]">
+                <span>{a.date}</span>
+                <span>·</span>
+                <span>{a.readTime}</span>
+              </div>
+              <span class="text-accent text-sm">Read →</span>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <div class="reveal mt-8 text-center">
+      <a
+        href="https://ravi-rajpurohit.medium.com/"
+        target="_blank"
+        class="text-[#6e6e73] hover:text-accent text-sm transition-colors"
+      >
+        All articles on Medium →
+      </a>
+    </div>
+
+  </div>
+</section>

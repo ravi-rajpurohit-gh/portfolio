@@ -1,0 +1,117 @@
+---
+import CaseStudy from '../../layouts/CaseStudy.astro';
+
+const diagPipeline = `flowchart LR
+    A[/"📦 Kaggle Dataset\\n1.2M+ App Records\\n~500MB raw CSV"/] -->|"data_prep.ipynb\\nPandas + NumPy"| B{"Pre-aggregation\\nby genre + time"}
+    B -->|"monthly granularity"| C[/"genre_race_monthly.csv\\n~45KB — monthly rankings"/]
+    B -->|"yearly granularity"| D[/"genre_race_yearly.csv\\n~5KB — yearly rankings"/]
+    C -->|"fetched by"| E["⚡ D3.js\\nObservable Notebook"]
+    D -->|"fetched by"| E
+    E -->|"renders"| F["SVG Bar Chart Race\\n13 Years Animated"]
+    F -->|"published"| G["📝 Medium Article\\n+ 🎥 YouTube Demo"]`;
+
+const diagPrep = `flowchart TD
+    RAW["Raw Dataset — 1.2M+ rows\\napp_name · genre · rating · reviews · release_date · price"] --> CLEAN["Data Cleaning\\n— Parse release_date to datetime\\n— Drop nulls in genre\\n— Normalize genre labels"]
+    CLEAN --> AGG["Aggregation\\n— Group by genre + year_month\\n— Sum review counts per genre\\n— Rank genres per time period"]
+    AGG --> M["genre_race_monthly.csv\\nColumns: year_month · genre · review_count · rank\\nRows: ~2,500"]
+    AGG --> Y["genre_race_yearly.csv\\nColumns: year · genre · review_count · rank\\nRows: ~180"]
+    style M fill:#2997ff,color:#fff,stroke:#0077ed
+    style Y fill:#2997ff,color:#fff,stroke:#0077ed`;
+---
+
+<CaseStudy
+  title="App Store Ecosystem Analytics"
+  subtitle="Transformed 500MB of raw Kaggle data into a smooth 50KB interactive bar chart race visualizing 13 years of App Store genre competition — built with Python and D3.js, published on Medium."
+  tags={['D3.js', 'Python', 'Pandas', 'NumPy', 'HTML/CSS', 'Observable']}
+  mediumUrl="https://ravi-rajpurohit.medium.com/the-genre-wars-how-i-visualized-13-years-of-app-store-history-without-crashing-your-browser-f56817e2b52d"
+  githubUrl="https://github.com/ravi-rajpurohit-gh"
+>
+
+  <div class="cs-section">
+    <h2>Overview</h2>
+    <p>
+      The App Store has over 13 years of public performance data — but raw datasets don't tell stories.
+      This project answers one question visually: <em style="color:#f5f5f7;">which app genres dominated the App Store,
+      and how did that competition shift year by year?</em>
+    </p>
+    <p>
+      The core technical challenge: the source dataset is 1.2M+ records (~500MB). Loading that volume
+      in a browser would crash it or take minutes. The solution was treating Python as an ETL layer —
+      pre-aggregating to two tiny CSV files (~50KB total) — then using D3.js exclusively for rendering
+      a synchronized animated bar chart race.
+    </p>
+  </div>
+
+  <div class="cs-section">
+    <h2>Data Pipeline</h2>
+    <p>Python handles all the heavy lifting. D3.js only ever sees pre-aggregated, browser-safe data.</p>
+    <pre class="mermaid" set:text={diagPipeline}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Pre-aggregation Design</h2>
+    <p>
+      Both output files are produced from a single Jupyter notebook
+      (<code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">data_prep.ipynb</code>).
+      The 99.99% size reduction — 500MB to 50KB — is what makes browser rendering possible.
+    </p>
+    <pre class="mermaid" set:text={diagPrep}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Key Engineering Decisions</h2>
+
+    <div class="adr-card">
+      <span class="decision">Decision #1 — Visualization Library</span>
+      <h3>Why D3.js over Plotly, Streamlit charts, or Tableau?</h3>
+      <p>
+        A synchronized bar chart race with smooth interpolation requires frame-level SVG control.
+        D3.js provides this via <code style="color:#2997ff;">d3.transition()</code> and
+        <code style="color:#2997ff;">selection.join()</code> — every bar's position, width, and label
+        animates independently per keyframe. Plotly and Streamlit charts treat each frame as a full
+        re-render, producing non-interpolated jumps. Tableau cannot produce custom animations of this type.
+        D3.js is the only library with the low-level SVG control this visualization requires.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #2 — ETL Strategy</span>
+      <h3>Why pre-aggregate with Python instead of processing in the browser?</h3>
+      <p>
+        1.2M records at ~500MB will exhaust browser memory or take minutes to parse.
+        Python is the right tool for heavy transformation: Pandas group-bys and aggregations
+        run in milliseconds on this dataset. The browser's job is exclusively rendering, not computing.
+        This separation of concerns — Python for ETL, D3.js for rendering — mirrors production
+        analytics architecture: the warehouse transforms data; the BI layer renders it.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #3 — Two Output Granularities</span>
+      <h3>Why monthly and yearly as separate files?</h3>
+      <p>
+        Monthly data reveals short-term market shifts and seasonal patterns.
+        Yearly data reveals long-term structural trends (the rise of Games from 2008–2014, the plateau of Utilities).
+        Combining them forces a tradeoff between granularity and payload size.
+        Two focused files, loaded on demand, keeps each visualization fast and purposeful —
+        the same principle as maintaining separate fact tables at different time grains in a dimensional model.
+      </p>
+    </div>
+  </div>
+
+  <div class="cs-section">
+    <h2>Outcome & Reflection</h2>
+    <p>
+      The most-read article on my Medium profile and the project that generated the most
+      LinkedIn engagement. The key insight that resonated with readers: data engineering
+      principles — ETL, pre-aggregation, separation of concerns — apply equally to frontend
+      data visualization.
+    </p>
+    <p>
+      Any visualization project above ~10K rows benefits from treating data preparation as a
+      proper pipeline problem. The D3.js code doesn't need to know how the data was shaped —
+      it just needs clean, small, consistently structured input. That's what a good data layer provides.
+    </p>
+  </div>
+
+</CaseStudy>

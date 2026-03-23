@@ -1,0 +1,152 @@
+---
+interface Props {
+  title: string;
+  subtitle: string;
+  tags: string[];
+  liveUrl?: string;
+  githubUrl?: string;
+  mediumUrl?: string;
+}
+
+const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} — Ravi Rajpurohit</title>
+    <!-- Mermaid for architecture diagrams -->
+    <script is:inline src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script is:inline>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'base',
+        themeVariables: {
+          background: '#1c1c1e',
+          primaryColor: '#2997ff',
+          primaryTextColor: '#f5f5f7',
+          primaryBorderColor: '#2d2d2f',
+          lineColor: '#6e6e73',
+          secondaryColor: '#0a0a0a',
+          tertiaryColor: '#1c1c1e',
+          fontFamily: 'Inter, -apple-system, sans-serif',
+          fontSize: '14px',
+          nodeBorder: '#2d2d2f',
+          clusterBkg: '#1c1c1e',
+          titleColor: '#f5f5f7',
+          edgeLabelBackground: '#1c1c1e',
+          attributeBackgroundColorEven: '#1c1c1e',
+          attributeBackgroundColorOdd: '#0a0a0a',
+        },
+      });
+    </script>
+  </head>
+  <body>
+    <!-- Nav -->
+    <nav style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);border-bottom:1px solid #2d2d2f;">
+      <div style="max-width:900px;margin:0 auto;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
+        <a href="/" style="color:#a1a1a6;font-size:0.875rem;text-decoration:none;display:flex;align-items:center;gap:0.5rem;">
+          ← Back
+        </a>
+        <a href="/" style="color:#f5f5f7;font-weight:600;text-decoration:none;font-size:1rem;">RR</a>
+      </div>
+    </nav>
+
+    <!-- Header -->
+    <header style="padding:8rem 1.5rem 3rem;max-width:900px;margin:0 auto;">
+      <p style="color:#2997ff;font-size:0.875rem;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;">Case Study</p>
+      <h1 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:#f5f5f7;line-height:1.1;margin-bottom:1rem;">{title}</h1>
+      <p style="font-size:1.125rem;color:#a1a1a6;max-width:600px;line-height:1.6;">{subtitle}</p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1.5rem;">
+        {tags.map(tag => <span class="badge">{tag}</span>)}
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:2rem;">
+        {liveUrl && (
+          <a href={liveUrl} target="_blank" style="display:inline-flex;align-items:center;gap:0.4rem;background:#2997ff;color:#fff;padding:0.5rem 1.25rem;border-radius:9999px;font-size:0.875rem;font-weight:500;text-decoration:none;">
+            Live Demo →
+          </a>
+        )}
+        {mediumUrl && (
+          <a href={mediumUrl} target="_blank" style="display:inline-flex;align-items:center;gap:0.4rem;border:1px solid #2d2d2f;color:#f5f5f7;padding:0.5rem 1.25rem;border-radius:9999px;font-size:0.875rem;font-weight:500;text-decoration:none;">
+            Read on Medium
+          </a>
+        )}
+        {githubUrl && (
+          <a href={githubUrl} target="_blank" style="display:inline-flex;align-items:center;gap:0.4rem;border:1px solid #2d2d2f;color:#f5f5f7;padding:0.5rem 1.25rem;border-radius:9999px;font-size:0.875rem;font-weight:500;text-decoration:none;">
+            GitHub
+          </a>
+        )}
+      </div>
+    </header>
+
+    <main style="max-width:900px;margin:0 auto;padding:0 1.5rem 6rem;">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer style="border-top:1px solid #2d2d2f;padding:2rem 1.5rem;text-align:center;">
+      <p style="color:#6e6e73;font-size:0.875rem;">
+        <a href="/" style="color:#2997ff;text-decoration:none;">← Back to all work</a>
+      </p>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  @import '../styles/global.css';
+
+  .cs-section {
+    margin-bottom: 4rem;
+  }
+
+  .cs-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #f5f5f7;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #2d2d2f;
+  }
+
+  .cs-section p {
+    color: #a1a1a6;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+
+  .adr-card {
+    background: #1c1c1e;
+    border: 1px solid #2d2d2f;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .adr-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f5f5f7;
+    margin-bottom: 0.5rem;
+  }
+
+  .adr-card p {
+    color: #a1a1a6;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .adr-card .decision {
+    display: inline-block;
+    color: #2997ff;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+</style>

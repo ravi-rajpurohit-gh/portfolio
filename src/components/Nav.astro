@@ -1,0 +1,45 @@
+---
+const links = [
+  { href: '#work', label: 'Work' },
+  { href: '#about', label: 'About' },
+  { href: '#experience', label: 'Experience' },
+  { href: '#writing', label: 'Writing' },
+  { href: '#contact', label: 'Contact' },
+];
+---
+
+<nav id="nav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="/" class="text-[#f5f5f7] font-semibold text-lg tracking-tight hover:text-accent transition-colors">
+      RR
+    </a>
+    <div class="hidden md:flex items-center gap-8">
+      {links.map(link => (
+        <a href={link.href} class="text-[#a1a1a6] hover:text-[#f5f5f7] text-sm font-medium transition-colors">
+          {link.label}
+        </a>
+      ))}
+    </div>
+    <!-- Copy your preferred resume to public/resume.pdf -->
+    <a
+      href="/resume.pdf"
+      target="_blank"
+      class="bg-accent hover:bg-[#0077ed] text-white text-sm font-medium px-4 py-2 rounded-full transition-colors duration-200"
+    >
+      Resume
+    </a>
+  </div>
+</nav>
+
+<script>
+  const nav = document.getElementById('nav')!;
+  const update = () => {
+    if (window.scrollY > 20) {
+      nav.style.cssText = 'background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid #2d2d2f;';
+    } else {
+      nav.style.cssText = '';
+    }
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+</script>
