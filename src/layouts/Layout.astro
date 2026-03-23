@@ -1,4 +1,23 @@
 ---
+/**
+ * BASE LAYOUT — src/layouts/Layout.astro
+ * ========================================
+ * The HTML shell for all pages. Sets up <head> metadata, imports global CSS,
+ * and runs the scroll-reveal observer after the page loads.
+ *
+ * Props:
+ *   title       — <title> tag content (defaults to Ravi's full title)
+ *   description — <meta description> (defaults to a generic summary)
+ *
+ * To add a new global <head> element (e.g. an analytics script, font, or
+ * Open Graph tag), add it inside the <head> block below.
+ *
+ * Used by: src/pages/index.astro
+ * See also: src/layouts/CaseStudy.astro (used by project case study pages)
+ */
+
+import '../styles/global.css';
+
 interface Props {
   title?: string;
   description?: string;
@@ -6,7 +25,8 @@ interface Props {
 
 const {
   title = 'Ravi Rajpurohit — Data Infrastructure Engineer',
-  description = 'Data Infrastructure Engineer specializing in scalable pipelines, cloud data platforms, and analytics. Building the systems that turn raw data into decisions.',
+  description =
+    'Data Infrastructure Engineer specializing in scalable pipelines, cloud data platforms, and analytics. Building the systems that turn raw data into decisions.',
 } = Astro.props;
 ---
 
@@ -23,16 +43,17 @@ const {
     <slot />
 
     <script>
-      // Scroll reveal
+      /**
+       * Scroll-reveal: any element with class "reveal" fades in when it
+       * enters the viewport. The animation is defined in global.css.
+       * Elements become visible by gaining the "visible" class.
+       */
       const observer = new IntersectionObserver(
-        (entries) => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')),
+        (entries) =>
+          entries.forEach((e) => e.isIntersecting && e.target.classList.add('visible')),
         { threshold: 0.1 }
       );
-      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+      document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
     </script>
   </body>
 </html>
-
-<style is:global>
-  @import '../styles/global.css';
-</style>

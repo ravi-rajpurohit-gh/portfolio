@@ -1,6 +1,24 @@
 ---
-// Update the filename/extension if you switch from PNG to JPG
-const photo = '/images/profile_pic.png';
+/**
+ * ABOUT — src/components/About.astro
+ * =====================================
+ * Two-column section: narrative text on the left, profile photo on the right.
+ * Below the text: skill badges and a personal/fun note.
+ *
+ * Content comes from src/data/site.ts:
+ *   - site.photo    → profile photo (update path in site.ts to switch formats)
+ *   - site.skills   → badge list below the bio text
+ *
+ * TO UPDATE THE BIO TEXT: edit the <p> paragraphs in the template below.
+ *   This is intentionally kept in the component (not in site.ts) because it's
+ *   narrative prose that's unlikely to change structure, only content.
+ *
+ * The profile photo has a subtle blue glow ring (the div behind it).
+ * Photo is circular via `rounded-full` and `object-cover`.
+ * The `onerror` fallback switches to .jpg if .png fails to load.
+ */
+
+import { site } from '../data/site';
 ---
 
 <section id="about" class="py-24 px-6">
@@ -10,49 +28,58 @@ const photo = '/images/profile_pic.png';
 
     <div class="grid md:grid-cols-2 gap-16 items-center">
 
-      <!-- Text -->
+      <!-- Left: text, skills, personal note -->
       <div>
         <h2 class="reveal text-4xl font-bold text-[#f5f5f7] mb-6 leading-tight">
           Building data systems<br />that actually get used.
         </h2>
-        <div class="reveal space-y-4 text-[#a1a1a6] text-lg leading-relaxed" style="animation-delay:0.1s">
+
+        <!-- Bio paragraphs — edit these directly -->
+        <div
+          class="reveal space-y-4 text-[#a1a1a6] text-lg leading-relaxed"
+          style="animation-delay:0.1s"
+        >
           <p>
-            I'm a Data Infrastructure Engineer based in Michigan. Over 5+ years I've designed pipelines
-            that process billions of events per month, built cloud data platforms that serve executive
-            decision-making, and created visualizations that turn complex datasets into clear stories.
+            I'm a Data Infrastructure Engineer based in Michigan. Over 5+ years I've designed
+            pipelines that process billions of events per month, built cloud data platforms that
+            serve executive decision-making, and created visualizations that turn complex datasets
+            into clear stories.
           </p>
           <p>
             Before my MS in Computer Science at UT Arlington, I built the data backbone for smart
             wearables at KaHa Technologies — real-time health analytics at 10M+ user scale. I care
-            deeply about the full stack: from ingestion architecture to the dashboard someone actually
-            opens every morning.
+            deeply about the full stack: from ingestion architecture to the dashboard someone
+            actually opens every morning.
           </p>
         </div>
 
+        <!-- Skill badges — sourced from site.skills in site.ts -->
         <div class="reveal mt-8 flex flex-wrap gap-3" style="animation-delay:0.2s">
-          <span class="badge">AWS</span>
-          <span class="badge">dbt</span>
-          <span class="badge">Apache Spark</span>
-          <span class="badge">Kafka</span>
-          <span class="badge">Snowflake</span>
-          <span class="badge">Python</span>
-          <span class="badge">D3.js</span>
-          <span class="badge">Airflow</span>
+          {site.skills.map((skill) => <span class="badge">{skill}</span>)}
         </div>
 
+        <!-- Personal note — edit the text and the chef link directly below -->
         <p class="reveal mt-8 text-[#6e6e73] text-sm" style="animation-delay:0.3s">
-          ⚡ Outside of data: racket sports 🏸🎾🏓, music 🎸, cooking 🧑‍🍳 —
-          and yes, I once <a href="https://drive.google.com/file/d/1VNMML9SCU_KENcqndlxAjtqMP5y43bFL/view?usp=sharing" target="_blank" class="text-accent hover:underline">worked as a chef</a> for my university's catering department.
+          ⚡ Outside of data: racket sports 🏸🎾🏓, music 🎸, cooking 🧑‍🍳 — and yes, I once{' '}
+          <a
+            href="https://drive.google.com/file/d/1VNMML9SCU_KENcqndlxAjtqMP5y43bFL/view?usp=sharing"
+            target="_blank"
+            class="text-accent hover:underline"
+          >
+            worked as a chef
+          </a>{' '}
+          for my university's catering department.
         </p>
       </div>
 
-      <!-- Photo -->
+      <!-- Right: profile photo with glow effect -->
       <div class="reveal flex justify-center md:justify-end" style="animation-delay:0.15s">
         <div class="relative">
-          <!-- Glow ring -->
+          <!-- Blue glow ring behind photo -->
           <div class="absolute inset-0 rounded-full bg-accent opacity-10 blur-2xl scale-110"></div>
+          <!-- Photo — src and onerror fallback controlled by site.photo -->
           <img
-            src={photo}
+            src={site.photo}
             alt="Ravi Rajpurohit"
             class="relative w-72 h-72 rounded-full object-cover border-2 border-[#2d2d2f]"
             onerror="this.src='/images/profile_pic.jpg'"

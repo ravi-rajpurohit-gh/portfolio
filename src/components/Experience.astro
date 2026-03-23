@@ -1,50 +1,24 @@
 ---
-const roles = [
-  {
-    title: 'Data Infrastructure Engineer',
-    company: 'State of Michigan — Ottawa Area ISD',
-    period: 'Jan 2025 – Present',
-    bullets: [
-      'Designed aggregate data layer on AWS (S3, Glue, Athena) consolidating 15+ siloed sources — cut executive report generation from 3 days to under 1 hour.',
-      'Built ELT pipelines in Python and PySpark processing 5M+ daily records with 40% latency reduction.',
-      'Designed dimensional models (Star schema) and dashboards tracking engagement metrics and behavioral trends.',
-    ],
-    accent: true,
-  },
-  {
-    title: 'Data Engineer — Research Applications',
-    company: 'University of Texas at Arlington',
-    period: 'Aug 2024 – Jan 2025',
-    bullets: [
-      'Built scalable pipelines for high-frequency sensor data at 200Hz, enabling ML inference for research teams.',
-      'Automated ETL workflows with Apache Airflow, reducing processing latency by 35%.',
-      'Engineered feature extraction tools (Pandas, NumPy) transforming raw biosignals into analytical datasets.',
-    ],
-    accent: false,
-  },
-  {
-    title: 'Data Engineer Intern — Cloud & APIs',
-    company: 'Nutanix',
-    period: 'May 2023 – Aug 2023',
-    bullets: [
-      'Designed pipelines for 500GB+ of daily logs supporting Sales and Support analytics.',
-      'Integrated Prometheus and Splunk observability, maintaining 99.9% service availability.',
-      'Optimized SQL query performance by 50% driving cloud cost optimization insights.',
-    ],
-    accent: false,
-  },
-  {
-    title: 'Software Data Engineer — Wearables & MLOps',
-    company: 'KaHa Technologies',
-    period: 'Jan 2020 – Jul 2022',
-    bullets: [
-      'Built end-to-end pipelines on Python + AWS processing 2B+ monthly events for 10M+ wearable users.',
-      'Deployed Kafka architecture for real-time telemetry ingestion, reducing data lag to under 5 seconds.',
-      'Maintained NoSQL datastores (MongoDB, DynamoDB) supporting 10k concurrent requests.',
-    ],
-    accent: false,
-  },
-];
+/**
+ * EXPERIENCE — src/components/Experience.astro
+ * ==============================================
+ * Vertical timeline of work roles, with an education card at the bottom.
+ *
+ * Content comes from src/data/experience.ts:
+ *   - roles[]     → work history entries (most recent first)
+ *   - education[] → degree entries
+ *
+ * To add a new role or update an existing one: edit experience.ts only.
+ * No changes needed in this file.
+ *
+ * Timeline anatomy:
+ *   - Blue dot on the left for the current role (accent: true)
+ *   - Gray dot for past roles
+ *   - Connecting line between dots (hidden on the last entry)
+ *   - Card with role title, company (in accent color), date badge, and bullets
+ */
+
+import { roles, education } from '../data/experience';
 ---
 
 <section id="experience" class="py-24 px-6 border-t border-[#2d2d2f]">
@@ -55,14 +29,25 @@ const roles = [
 
     <div class="space-y-0">
       {roles.map((role, i) => (
-        <div class="reveal relative pl-10 pb-12" style={`animation-delay:${i * 0.1}s`}>
-          <!-- Timeline dot -->
-          <div class={`absolute left-0 top-1.5 w-3.5 h-3.5 rounded-full border-2 ${role.accent ? 'bg-accent border-accent' : 'bg-[#2d2d2f] border-[#6e6e73]'}`}></div>
-          <!-- Timeline line -->
+        <div
+          class="reveal relative pl-10 pb-12"
+          style={`animation-delay:${i * 0.1}s`}
+        >
+          <!-- Timeline dot — blue for current role, gray for past -->
+          <div
+            class={`absolute left-0 top-1.5 w-3.5 h-3.5 rounded-full border-2 ${
+              role.accent
+                ? 'bg-accent border-accent'
+                : 'bg-[#2d2d2f] border-[#6e6e73]'
+            }`}
+          ></div>
+
+          <!-- Connecting vertical line (hidden on last entry) -->
           {i < roles.length - 1 && (
             <div class="absolute left-[6px] top-5 bottom-0 w-px bg-[#2d2d2f]"></div>
           )}
 
+          <!-- Role card -->
           <div class="bg-[#1c1c1e] border border-[#2d2d2f] rounded-2xl p-6 hover:border-[#3d3d3f] transition-colors">
             <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
               <div>
@@ -73,11 +58,13 @@ const roles = [
                 {role.period}
               </span>
             </div>
+
+            <!-- Bullet points -->
             <ul class="space-y-2">
-              {role.bullets.map(b => (
+              {role.bullets.map((bullet) => (
                 <li class="flex gap-2 text-sm text-[#a1a1a6] leading-relaxed">
                   <span class="text-[#6e6e73] mt-1.5 shrink-0">—</span>
-                  <span>{b}</span>
+                  <span>{bullet}</span>
                 </li>
               ))}
             </ul>
@@ -86,17 +73,19 @@ const roles = [
       ))}
     </div>
 
-    <!-- Education -->
-    <div class="reveal mt-8 bg-[#1c1c1e] border border-[#2d2d2f] rounded-2xl p-6">
-      <p class="text-[#6e6e73] text-xs uppercase tracking-widest font-medium mb-3">Education</p>
-      <div class="flex flex-wrap justify-between gap-2">
-        <div>
-          <p class="text-[#f5f5f7] font-semibold">MS Computer Science</p>
-          <p class="text-accent text-sm">University of Texas at Arlington</p>
+    <!-- Education — rendered from education[] in experience.ts -->
+    {education.map((deg) => (
+      <div class="reveal mt-2 bg-[#1c1c1e] border border-[#2d2d2f] rounded-2xl p-6">
+        <p class="text-[#6e6e73] text-xs uppercase tracking-widest font-medium mb-3">Education</p>
+        <div class="flex flex-wrap justify-between gap-2">
+          <div>
+            <p class="text-[#f5f5f7] font-semibold">{deg.degree}</p>
+            <p class="text-accent text-sm">{deg.school}</p>
+          </div>
+          <span class="text-[#6e6e73] text-sm">{deg.period}</span>
         </div>
-        <span class="text-[#6e6e73] text-sm">2022 – 2024</span>
       </div>
-    </div>
+    ))}
 
   </div>
 </section>

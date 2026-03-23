@@ -1,4 +1,22 @@
 ---
+/**
+ * CONTACT — src/components/Contact.astro
+ * =========================================
+ * Centered CTA section with social link buttons, followed by the site footer.
+ *
+ * Content comes from src/data/site.ts:
+ *   - site.email          → primary email button
+ *   - site.social.linkedin → LinkedIn button
+ *   - site.social.github   → GitHub button
+ *   - site.social.medium   → Medium button
+ *
+ * The opening paragraph describes availability — edit it directly below
+ * (e.g. update it when you're no longer actively looking).
+ *
+ * Footer: displays current year and tech stack credit.
+ */
+
+import { site } from '../data/site';
 ---
 
 <section id="contact" class="py-24 px-6 border-t border-[#2d2d2f]">
@@ -10,34 +28,39 @@
       Let's build something together.
     </h2>
 
-    <p class="reveal text-[#a1a1a6] text-lg max-w-xl mx-auto mb-12 leading-relaxed" style="animation-delay:0.1s">
+    <!-- Availability note — update this text when your job search status changes -->
+    <p
+      class="reveal text-[#a1a1a6] text-lg max-w-xl mx-auto mb-12 leading-relaxed"
+      style="animation-delay:0.1s"
+    >
       I'm open to senior Data Engineer and Analytics Engineer roles at established tech companies.
       Reach out if you're working on something interesting.
     </p>
 
+    <!-- Social buttons — sourced from site.ts -->
     <div class="reveal flex flex-wrap justify-center gap-4" style="animation-delay:0.2s">
       <a
-        href="mailto:ravirajpurohit414@gmail.com"
+        href={`mailto:${site.email}`}
         class="bg-accent hover:bg-[#0077ed] text-white font-medium px-6 py-3 rounded-full transition-colors duration-200"
       >
-        ravirajpurohit414@gmail.com
+        {site.email}
       </a>
       <a
-        href="https://linkedin.com/in/ravi-rajpurohit"
+        href={site.social.linkedin}
         target="_blank"
         class="border border-[#2d2d2f] hover:border-[#6e6e73] text-[#a1a1a6] hover:text-[#f5f5f7] font-medium px-6 py-3 rounded-full transition-colors duration-200"
       >
         LinkedIn
       </a>
       <a
-        href="https://github.com/ravi-rajpurohit-gh"
+        href={site.social.github}
         target="_blank"
         class="border border-[#2d2d2f] hover:border-[#6e6e73] text-[#a1a1a6] hover:text-[#f5f5f7] font-medium px-6 py-3 rounded-full transition-colors duration-200"
       >
         GitHub
       </a>
       <a
-        href="https://ravi-rajpurohit.medium.com/"
+        href={site.social.medium}
         target="_blank"
         class="border border-[#2d2d2f] hover:border-[#6e6e73] text-[#a1a1a6] hover:text-[#f5f5f7] font-medium px-6 py-3 rounded-full transition-colors duration-200"
       >
@@ -48,11 +71,15 @@
   </div>
 </section>
 
+<!-- Footer — intentionally kept minimal -->
 <footer class="border-t border-[#2d2d2f] py-8 px-6">
   <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
-    <p class="text-[#6e6e73] text-sm">© 2026 Ravi Rajpurohit</p>
+    <p class="text-[#6e6e73] text-sm">© {new Date().getFullYear()} Ravi Rajpurohit</p>
     <p class="text-[#6e6e73] text-sm">
-      Built with <a href="https://astro.build" target="_blank" class="text-accent hover:underline">Astro</a> · Deployed on <a href="https://vercel.com" target="_blank" class="text-accent hover:underline">Vercel</a>
+      Built with{' '}
+      <a href="https://astro.build" target="_blank" class="text-accent hover:underline">Astro</a>
+      {' '}· Deployed on{' '}
+      <a href="https://vercel.com" target="_blank" class="text-accent hover:underline">Vercel</a>
     </p>
   </div>
 </footer>

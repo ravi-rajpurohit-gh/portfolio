@@ -1,4 +1,39 @@
 ---
+/**
+ * CASE STUDY LAYOUT — src/layouts/CaseStudy.astro
+ * =================================================
+ * Layout for individual project case study pages.
+ * Renders the page chrome (nav, header, footer) and loads Mermaid for diagrams.
+ *
+ * Props:
+ *   title      — Project name (large H1)
+ *   subtitle   — One-sentence description shown below the title
+ *   tags       — Tech stack badges (string array)
+ *   liveUrl    — Optional: link to live demo (shown as primary CTA button)
+ *   githubUrl  — Optional: GitHub repo link
+ *   mediumUrl  — Optional: Medium article link
+ *
+ * HOW TO ADD A NEW CASE STUDY:
+ *   1. Create src/pages/projects/your-slug.astro
+ *   2. Import and use this layout: `import CaseStudy from '../../layouts/CaseStudy.astro'`
+ *   3. Pass the required props above
+ *   4. Use the CSS classes defined in the <style is:global> block here:
+ *        .cs-section  — wraps each content section (Overview, Architecture, etc.)
+ *        .adr-card    — card for each Architectural Decision Record
+ *        .mermaid     — container for Mermaid diagrams (pre tag with set:text)
+ *
+ * HOW MERMAID DIAGRAMS WORK:
+ *   Mermaid@10 is loaded from CDN. Diagrams are defined as template literal
+ *   strings in the page frontmatter and rendered via:
+ *     <pre class="mermaid" set:text={diagramString}></pre>
+ *   The `set:text` attribute is required — do NOT use curly braces directly
+ *   inside the template as Astro treats them as JS expressions.
+ *
+ * Used by: src/pages/projects/*.astro
+ */
+
+import '../styles/global.css';
+
 interface Props {
   title: string;
   subtitle: string;
@@ -17,9 +52,14 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title} — Ravi Rajpurohit</title>
-    <!-- Mermaid for architecture diagrams -->
+    <!-- Mermaid@10 UMD build — provides a global `mermaid` object -->
     <script is:inline src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script is:inline>
+      /**
+       * Initialize Mermaid with a dark theme matching the site palette.
+       * Runs before page paint to avoid unstyled diagram flash.
+       * To change the diagram appearance, edit themeVariables below.
+       */
       mermaid.initialize({
         startOnLoad: true,
         theme: 'base',
@@ -44,26 +84,33 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
     </script>
   </head>
   <body>
-    <!-- Nav -->
+
+    <!-- Minimal sticky nav for case study pages -->
     <nav style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);border-bottom:1px solid #2d2d2f;">
       <div style="max-width:900px;margin:0 auto;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
-        <a href="/" style="color:#a1a1a6;font-size:0.875rem;text-decoration:none;display:flex;align-items:center;gap:0.5rem;">
-          ← Back
-        </a>
-        <a href="/" style="color:#f5f5f7;font-weight:600;text-decoration:none;font-size:1rem;">RR</a>
+        <a href="/" style="color:#a1a1a6;font-size:0.875rem;text-decoration:none;">← Back</a>
+        <a href="/" style="color:#f5f5f7;font-weight:600;text-decoration:none;">RR</a>
       </div>
     </nav>
 
-    <!-- Header -->
+    <!-- Case study header -->
     <header style="padding:8rem 1.5rem 3rem;max-width:900px;margin:0 auto;">
-      <p style="color:#2997ff;font-size:0.875rem;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;">Case Study</p>
-      <h1 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:#f5f5f7;line-height:1.1;margin-bottom:1rem;">{title}</h1>
-      <p style="font-size:1.125rem;color:#a1a1a6;max-width:600px;line-height:1.6;">{subtitle}</p>
+      <p style="color:#2997ff;font-size:0.875rem;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;">
+        Case Study
+      </p>
+      <h1 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:#f5f5f7;line-height:1.1;margin-bottom:1rem;">
+        {title}
+      </h1>
+      <p style="font-size:1.125rem;color:#a1a1a6;max-width:640px;line-height:1.6;">
+        {subtitle}
+      </p>
 
+      <!-- Tech stack badges -->
       <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1.5rem;">
-        {tags.map(tag => <span class="badge">{tag}</span>)}
+        {tags.map((tag) => <span class="badge">{tag}</span>)}
       </div>
 
+      <!-- CTA buttons — only rendered when the prop is provided -->
       <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:2rem;">
         {liveUrl && (
           <a href={liveUrl} target="_blank" style="display:inline-flex;align-items:center;gap:0.4rem;background:#2997ff;color:#fff;padding:0.5rem 1.25rem;border-radius:9999px;font-size:0.875rem;font-weight:500;text-decoration:none;">
@@ -83,21 +130,27 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
       </div>
     </header>
 
+    <!-- Page body — provided by the individual case study page -->
     <main style="max-width:900px;margin:0 auto;padding:0 1.5rem 6rem;">
       <slot />
     </main>
 
-    <!-- Footer -->
     <footer style="border-top:1px solid #2d2d2f;padding:2rem 1.5rem;text-align:center;">
-      <p style="color:#6e6e73;font-size:0.875rem;">
-        <a href="/" style="color:#2997ff;text-decoration:none;">← Back to all work</a>
-      </p>
+      <a href="/" style="color:#2997ff;font-size:0.875rem;text-decoration:none;">
+        ← Back to all work
+      </a>
     </footer>
   </body>
 </html>
 
 <style is:global>
-  @import '../styles/global.css';
+  /**
+   * Case study specific styles.
+   * These are scoped to case study pages via the CaseStudy layout.
+   *
+   * .cs-section  — main content section wrapper (adds spacing + h2 styling)
+   * .adr-card    — Architectural Decision Record card
+   */
 
   .cs-section {
     margin-bottom: 4rem;
@@ -107,46 +160,52 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
     font-size: 1.5rem;
     font-weight: 600;
     color: #f5f5f7;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid #2d2d2f;
   }
 
   .cs-section p {
     color: #a1a1a6;
-    line-height: 1.7;
+    line-height: 1.75;
     margin-bottom: 1rem;
   }
 
+  /* ADR card: one per key engineering decision */
   .adr-card {
     background: #1c1c1e;
     border: 1px solid #2d2d2f;
     border-radius: 12px;
     padding: 1.5rem;
     margin-bottom: 1rem;
+    transition: border-color 0.2s;
+  }
+
+  .adr-card:hover {
+    border-color: #3d3d3f;
   }
 
   .adr-card h3 {
     font-size: 1rem;
     font-weight: 600;
     color: #f5f5f7;
-    margin-bottom: 0.5rem;
+    margin: 0.4rem 0 0.6rem;
   }
 
   .adr-card p {
     color: #a1a1a6;
     font-size: 0.9rem;
-    line-height: 1.6;
+    line-height: 1.7;
     margin: 0;
   }
 
+  /* Small label above the ADR question, e.g. "Decision #1 — Storage" */
   .adr-card .decision {
     display: inline-block;
     color: #2997ff;
-    font-size: 0.75rem;
-    font-weight: 500;
+    font-size: 0.72rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.5rem;
+    letter-spacing: 0.06em;
   }
 </style>
