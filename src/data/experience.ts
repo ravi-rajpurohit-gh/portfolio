@@ -52,7 +52,7 @@ export const roles: Role[] = [
     bullets: [
       'Built scalable pipelines for high-frequency sensor data at 200Hz, enabling ML inference for research teams.',
       'Automated ETL workflows with Apache Airflow, reducing processing latency by 35%.',
-      'Engineered feature extraction tools (Pandas, NumPy) transforming raw biosignals into analytical datasets.',
+      'Built feature extraction tools in Pandas and NumPy to convert raw biosignal recordings into structured datasets for downstream analysis.',
     ],
   },
   {
@@ -63,7 +63,7 @@ export const roles: Role[] = [
     bullets: [
       'Designed pipelines for 500GB+ of daily logs supporting Sales and Support analytics.',
       'Integrated Prometheus and Splunk observability, maintaining 99.9% service availability.',
-      'Optimized SQL query performance by 50% driving cloud cost optimization insights.',
+      'Optimized SQL query performance by 50%, reducing compute costs on the Sales and Support analytics workloads.',
     ],
   },
   {

@@ -26,7 +26,7 @@ import { pillars } from '../data/site';
           class="reveal bg-[#1c1c1e] border border-[#2d2d2f] rounded-2xl p-8 hover:border-[#3d3d3f] transition-colors duration-300"
           style={`animation-delay:${i * 0.1}s`}
         >
-          <div class="text-3xl mb-4">{pillar.icon}</div>
+          <div class="mb-4 text-accent" set:html={pillar.icon}></div>
           <h3 class="text-[#f5f5f7] font-semibold text-lg mb-3">{pillar.title}</h3>
           <p class="text-[#6e6e73] text-sm leading-relaxed">{pillar.description}</p>
         </div>
