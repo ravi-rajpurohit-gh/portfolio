@@ -2,11 +2,11 @@
 import CaseStudy from '../../layouts/CaseStudy.astro';
 
 const diagArch = `flowchart LR
-    A["🐍 Python Script\\ngenerate_mock_data.py"] -->|"generates 3 CSVs"| B[/"raw_data/\\nvendors.csv\\nprojects.csv\\nexpenses.csv"/]
-    B -->|"read_csv_auto()"| C["⚙️ dbt-core\\ndbt build"]
-    C -->|"materializes tables"| D[("🦆 DuckDB\\nplaces_database.duckdb")]
+    A["Python Script\\ngenerate_mock_data.py"] -->|"generates 3 CSVs"| B[/"raw_data/\\nvendors.csv\\nprojects.csv\\nexpenses.csv"/]
+    B -->|"read_csv_auto()"| C["dbt-core\\ndbt build"]
+    C -->|"materializes tables"| D[("DuckDB\\nplaces_database.duckdb")]
     C -->|"writes artifacts"| E[/"run_results.json\\nmanifest.json"/]
-    D -->|"query"| F["🎯 Streamlit App\\napp.py"]
+    D -->|"query"| F["Streamlit App\\napp.py"]
     E -->|"parse"| F
     F --> G["Tab 1: Operations\\nCapEx Dashboard"]
     F --> H["Tab 2: Pipeline Health\\nEngineering View"]

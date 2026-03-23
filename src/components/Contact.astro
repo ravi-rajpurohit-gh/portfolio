@@ -41,7 +41,7 @@ import { site } from '../data/site';
     <div class="reveal flex flex-wrap justify-center gap-4" style="animation-delay:0.2s">
       <a
         href={`mailto:${site.email}`}
-        class="bg-accent hover:bg-[#0077ed] text-white font-medium px-6 py-3 rounded-full transition-colors duration-200"
+        class="border border-[#2d2d2f] hover:border-[#6e6e73] text-[#a1a1a6] hover:text-[#f5f5f7] font-medium px-6 py-3 rounded-full transition-colors duration-200"
       >
         Email
       </a>
@@ -73,13 +73,7 @@ import { site } from '../data/site';
 
 <!-- Footer — intentionally kept minimal -->
 <footer class="border-t border-[#2d2d2f] py-8 px-6">
-  <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+  <div class="max-w-6xl mx-auto text-center">
     <p class="text-[#6e6e73] text-sm">© {new Date().getFullYear()} Ravi Rajpurohit</p>
-    <p class="text-[#6e6e73] text-sm">
-      Built with{' '}
-      <a href="https://astro.build" target="_blank" class="text-accent hover:underline">Astro</a>
-      {' '}· Deployed on{' '}
-      <a href="https://vercel.com" target="_blank" class="text-accent hover:underline">Vercel</a>
-    </p>
   </div>
 </footer>

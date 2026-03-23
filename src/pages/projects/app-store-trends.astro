@@ -2,13 +2,13 @@
 import CaseStudy from '../../layouts/CaseStudy.astro';
 
 const diagPipeline = `flowchart LR
-    A[/"📦 Kaggle Dataset\\n1.2M+ App Records\\n~500MB raw CSV"/] -->|"data_prep.ipynb\\nPandas + NumPy"| B{"Pre-aggregation\\nby genre + time"}
+    A[/"Kaggle Dataset\\n1.2M+ App Records\\n~500MB raw CSV"/] -->|"data_prep.ipynb\\nPandas + NumPy"| B{"Pre-aggregation\\nby genre + time"}
     B -->|"monthly granularity"| C[/"genre_race_monthly.csv\\n~45KB — monthly rankings"/]
     B -->|"yearly granularity"| D[/"genre_race_yearly.csv\\n~5KB — yearly rankings"/]
-    C -->|"fetched by"| E["⚡ D3.js\\nObservable Notebook"]
+    C -->|"fetched by"| E["D3.js\\nObservable Notebook"]
     D -->|"fetched by"| E
     E -->|"renders"| F["SVG Bar Chart Race\\n13 Years Animated"]
-    F -->|"published"| G["📝 Medium Article\\n+ 🎥 YouTube Demo"]`;
+    F -->|"published"| G["Medium Article\\n+ YouTube Demo"]`;
 
 const diagPrep = `flowchart TD
     RAW["Raw Dataset — 1.2M+ rows\\napp_name · genre · rating · reviews · release_date · price"] --> CLEAN["Data Cleaning\\n— Parse release_date to datetime\\n— Drop nulls in genre\\n— Normalize genre labels"]
