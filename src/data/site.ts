@@ -18,7 +18,7 @@
 
 export const site = {
   name: 'Ravi Rajpurohit',
-  role: 'Data Infrastructure Engineer',
+  role: 'Data | Infrastructure | Analytics',
   tagline: 'I build the pipelines, platforms, and analytics layers that turn raw data into decisions.',
 
   // ── Contact ──────────────────────────────────────────────────────────────
@@ -52,8 +52,8 @@ export const site = {
   // ── About section skill badges ───────────────────────────────────────────
   // Displayed as pill badges below the about text. Reorder or add freely.
   skills: [
-    'AWS', 'dbt', 'Apache Spark', 'Kafka',
-    'Snowflake', 'Python', 'D3.js', 'Airflow',
+    'AWS', 'dbt', 'Apache Spark', 'Kafka', 'Airflow',
+    'Python', 'SQL', 'Snowflake', 'D3.js'
   ],
 
   // ── Navigation links ─────────────────────────────────────────────────────
@@ -77,19 +77,19 @@ export const pillars = [
     icon: '🔧',
     title: 'End-to-End Data Pipelines',
     description:
-      'High-throughput ingestion (Kafka, 2B+ events/month) through analytics-ready layers using dbt, Star schemas, and dimensional modeling. Built for reliability and observability.',
+      'High-throughput ingestion (Kafka, 2B+ events/month) through analytics-ready layers using dbt, STAR schemas, and dimensional modeling. Built for reliability and observability.',
   },
   {
     icon: '☁️',
     title: 'Cloud Data Platforms',
     description:
-      'AWS-native architectures (Glue, Athena, EMR, S3) and modern data stacks (Snowflake, Databricks, DuckDB). Designed for scale, cost-efficiency, and developer experience.',
+      'AWS-native architectures (Glue, Athena, Spark, S3) and modern data stacks (Snowflake, Databricks, DuckDB). Designed for scale, cost-efficiency, and developer experience.',
   },
   {
     icon: '📊',
     title: 'Analytics & BI',
     description:
-      'Executive dashboards, D3.js data stories, and self-serve reporting that cuts insight generation from days to minutes. Designed for the end user, not just the data model.',
+      'Executive dashboards, D3.js data stories, and self-serve reporting that cuts insight generation from days to minutes. Powered by Generative BI for native natural language questions and answers. Designed for the end user, not just the data model.',
   },
   {
     icon: '🤖',

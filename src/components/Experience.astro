@@ -60,11 +60,10 @@ import { roles, education } from '../data/experience';
             </div>
 
             <!-- Bullet points -->
-            <ul class="space-y-2">
+            <ul class="space-y-2 list-disc list-inside">
               {role.bullets.map((bullet) => (
-                <li class="flex gap-2 text-sm text-[#a1a1a6] leading-relaxed">
-                  <span class="text-[#6e6e73] mt-1.5 shrink-0">—</span>
-                  <span>{bullet}</span>
+                <li class="text-sm text-[#a1a1a6] leading-relaxed marker:text-[#6e6e73]">
+                  {bullet}
                 </li>
               ))}
             </ul>
