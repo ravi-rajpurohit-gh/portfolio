@@ -42,7 +42,7 @@ export const projects: Project[] = [
     title: 'PlacesOps',
     subtitle: 'BI Dashboard & Modern Data Stack Prototype',
     description:
-      'End-to-end data pipeline and monitoring dashboard simulating a modern data stack for facilities & operations management. Dual view: a capital expenditure dashboard for business stakeholders and a dbt pipeline health monitor for data engineers.',
+      'A BI dashboard prototype built on DuckDB, dbt-core, and Streamlit. Two tabs for two audiences: a capital expenditure view for business stakeholders, and a pipeline health monitor for data engineers — both powered by the same fact table.',
     tags: ['dbt', 'DuckDB', 'Streamlit', 'Python', 'SQL'],
     gradient: 'from-blue-600 to-purple-700',
     liveUrl: 'https://places-ops.streamlit.app/',
@@ -53,7 +53,7 @@ export const projects: Project[] = [
     title: 'App Store Ecosystem Analytics',
     subtitle: 'Interactive Data Storytelling with D3.js',
     description:
-      'Transformed 500MB of raw Kaggle data into a smooth 50KB interactive bar chart race visualizing 13 years of App Store genre trends. Published on Medium and featured on LinkedIn.',
+      '500MB of raw Kaggle data, pre-aggregated down to 50KB via Python, rendered as a smooth animated bar chart race in D3.js. 13 years of App Store genre competition in one visualization. Published on Medium.',
     tags: ['D3.js', 'Python', 'Pandas', 'HTML/CSS'],
     gradient: 'from-orange-500 to-red-600',
     mediumUrl:
@@ -65,7 +65,7 @@ export const projects: Project[] = [
     title: 'Uber NYC Dashboard',
     subtitle: 'Geospatial Analytics Dashboard',
     description:
-      'Interactive geospatial analytics dashboard exploring Uber pickup and dropoff patterns across New York City. Features neighborhood-level analysis, time-based filtering, and statistical insights.',
+      'Streamlit dashboard exploring Uber pickup and dropoff patterns across New York City. Neighborhood-level breakdowns, time filters, and statistical summaries — built to make the spatial patterns in the data easy to read.',
     tags: ['Streamlit', 'Pandas', 'NumPy', 'Python'],
     gradient: 'from-emerald-600 to-teal-700',
     liveUrl: 'https://uber-nyc-dashboard.streamlit.app/',
@@ -75,7 +75,7 @@ export const projects: Project[] = [
     title: 'ChatPilot',
     subtitle: 'Multi-Provider AI Chat Application',
     description:
-      'Versatile AI chat application supporting multiple LLM providers (Gemini, OpenAI) with a clean Streamlit interface. Actively developed — planned features include model switching and prompt memory.',
+      'AI chat application with support for multiple LLM providers (Gemini, OpenAI) via a Streamlit interface. Actively developed — model switching and prompt memory are on the roadmap.',
     tags: ['Streamlit', 'Gemini API', 'OpenAI API', 'Python'],
     gradient: 'from-violet-600 to-pink-700',
     githubUrl: 'https://github.com/ravi-rajpurohit-gh/chat-pilot',
