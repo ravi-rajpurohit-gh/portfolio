@@ -1,0 +1,206 @@
+---
+import CaseStudy from '../../layouts/CaseStudy.astro';
+
+const diagArchitecture = `flowchart TD
+    subgraph Sources ["State & District Data Sources"]
+        A["CEPI\\nXML — annual exports"]
+        B["MISCHOOL / TSDL\\nManual download"]
+        C["MSDS\\nCSV — periodic"]
+        D["District SIS\\nPower School · Synergy · IC"]
+    end
+
+    subgraph Ingestion ["Ingestion Layer"]
+        E["EventBridge\\nScheduled triggers"]
+        F["Manual Data Loader\\nLambda — ad-hoc uploads"]
+    end
+
+    RAW[/"S3 Raw Zone\\nOriginal formats preserved"/]
+
+    subgraph Processing ["Processing — Step Functions orchestrated"]
+        G["Glue DataBrew\\nProfiling + schema validation"]
+        H["Amazon Glue (PySpark)\\nParquet conversion + joins"]
+    end
+
+    subgraph Governance ["Governance Layer"]
+        J["AWS Lake Formation\\nColumn-level access control"]
+        K["Glue Data Catalog\\nSchema registry"]
+    end
+
+    PROC[/"S3 Processed Zone\\nParquet — partitioned by year + district"/]
+
+    subgraph Query ["Query and Visualization"]
+        L["Amazon Athena\\nServerless SQL"]
+        M["Amazon QuickSight\\nExecutive dashboards"]
+        N["Power BI\\nDistrict-level reporting"]
+    end
+
+    subgraph Monitor ["Monitoring"]
+        O["DynamoDB\\nJob run audit log"]
+        P["Amazon SNS\\nSuccess / failure alerts"]
+    end
+
+    A & B & C --> F --> RAW
+    D --> E --> RAW
+    RAW --> G --> H --> PROC
+    PROC --> K --> J --> L
+    L --> M & N
+    H --> O & P
+
+    style PROC fill:#2997ff,color:#fff,stroke:#0077ed`;
+
+const diagStepFunctions = `flowchart TD
+    Start([Start]) --> LS["Log Start\\nDynamoDB: PutItem"]
+    LS --> UE["Upload EEM to S3\\nLambda: Invoke"]
+    UE --> SC{Status Code Result}
+    SC -->|"2xx"| LUS["Log Update Success\\nDynamoDB: UpdateItem"]
+    SC -->|"4xx / 5xx"| LUF["Log Update Failure\\nDynamoDB: UpdateItem"]
+    LUS --> CP["Convert to Parquet\\nGlue: StartJobRun"]
+    CP --> ES["Email Success\\nSNS: Publish"]
+    ES --> End([Succeed])
+    LUF --> EF["Email Failure\\nSNS: Publish"]
+    EF --> Fail([Fail])
+
+    style End fill:#2997ff,color:#fff,stroke:#0077ed
+    style Fail fill:#ff453a,color:#fff,stroke:#d70015`;
+
+const diagBefore = `flowchart LR
+    A["15+ siloed sources\\nCEPI · MSDS · MISCHOOL\\nDistrict SIS platforms"] -->|"manual export\\nper request"| B["Analyst\\nruns query"]
+    B -->|"3 days"| C["Executive\\nreport"]`;
+
+const diagAfter = `flowchart LR
+    A["Unified Data Lake\\nAll sources consolidated\\nPartitioned Parquet"] -->|"Athena SQL"| B["QuickSight / Power BI\\ndashboard"]
+    B -->|"under 1 hour"| C["Executive\\nreport"]
+    style A fill:#2997ff,color:#fff,stroke:#0077ed`;
+---
+
+<CaseStudy
+  title="Michigan K-12 Data Lake"
+  subtitle="A production AWS data lake consolidating 15+ siloed state and district education data sources — cutting executive report generation from 3 days to under an hour."
+  tags={['AWS Glue', 'PySpark', 'Athena', 'Step Functions', 'Lake Formation', 'S3', 'Python']}
+  githubUrl=""
+>
+
+  <div class="cs-section">
+    <h2>Context</h2>
+    <p>
+      Ottawa Area ISD is a regional educational service agency serving K-12 school districts across
+      West Michigan. The data problem was straightforward but deep: student enrollment, financial,
+      and assessment data lived in 15+ separate systems — CEPI, MSDS, MISCHOOL, TSDL, and district-level
+      SIS platforms (Power School, Synergy, Infinite Campus) — with no unified layer. Every
+      executive report required an analyst to manually pull, reconcile, and join data across systems.
+      That process took three days per report.
+    </p>
+    <p>
+      The goal was to design and build a data lake on AWS that could consolidate all of these sources
+      into a single queryable layer, with proper governance, orchestration, and monitoring built in
+      from the start.
+    </p>
+  </div>
+
+  <div class="cs-section">
+    <h2>Before and After</h2>
+    <p>The change in report generation time was the most concrete outcome, but the underlying shift was architectural.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.5rem;">
+      <div>
+        <p style="color:#6e6e73;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">Before</p>
+        <pre class="mermaid" set:text={diagBefore}></pre>
+      </div>
+      <div>
+        <p style="color:#2997ff;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">After</p>
+        <pre class="mermaid" set:text={diagAfter}></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="cs-section">
+    <h2>System Architecture</h2>
+    <p>
+      Data flows from heterogeneous state and district sources through a two-zone S3 lake —
+      raw formats preserved, then transformed to Parquet — governed by Lake Formation and
+      queryable via Athena.
+    </p>
+    <pre class="mermaid" set:text={diagArchitecture}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Orchestration: Step Functions State Machine</h2>
+    <p>
+      Each data load is orchestrated by an AWS Step Functions state machine. Every run is
+      logged to DynamoDB on start and on completion — so there's always an audit trail of
+      what ran, when, and what status it exited with. SNS handles notifications to the team
+      on both success and failure paths.
+    </p>
+    <p>
+      The state machine was designed so that failures don't silently disappear — the failure
+      branch is just as explicit as the success branch, and both write to the same audit log.
+    </p>
+    <pre class="mermaid" set:text={diagStepFunctions}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Key Engineering Decisions</h2>
+
+    <div class="adr-card">
+      <span class="decision">Decision #1 — Storage Format</span>
+      <h3>Why Parquet over CSV or JSON in the processed zone?</h3>
+      <p>
+        The source data arrives in mixed formats — XML from CEPI, CSV from MSDS, manual downloads
+        from MISCHOOL. The raw zone preserves original formats exactly, which matters for
+        traceability and reprocessing. The processed zone converts everything to Parquet. For
+        Athena queries — which are always aggregations across large time ranges and district
+        subsets — columnar storage is significantly faster and cheaper: Athena charges per
+        byte scanned, so a query that reads two columns on a Parquet file doesn't pay for
+        the other twenty. Partitioning by year and district compounds this.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #2 — Governance</span>
+      <h3>Why AWS Lake Formation instead of S3 bucket policies alone?</h3>
+      <p>
+        Student data has strict access requirements — different district staff should see only
+        their own district's records, and certain columns (PII, financial) should not be readable
+        by all consumers. S3 bucket policies operate at the object level, which isn't granular
+        enough. Lake Formation provides column-level and row-level filtering that sits above
+        the storage layer and applies consistently whether the query comes from Athena, QuickSight,
+        or an analyst's notebook. It also integrates with IAM and makes access audits straightforward.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #3 — Orchestration</span>
+      <h3>Why Step Functions over Airflow or plain Lambda chaining?</h3>
+      <p>
+        The pipeline has branching logic — different source types go through different
+        transformation paths, and failures need to be handled differently from successes.
+        Airflow would have been overkill for an organization that doesn't already run it;
+        maintaining an Airflow deployment adds infrastructure overhead that isn't justified here.
+        Plain Lambda chaining is hard to visualize and debug when something goes wrong.
+        Step Functions gives visual workflow state, built-in retry logic, and the ability
+        to see exactly which state a failed execution stopped at — which matters for a small
+        team that needs to diagnose issues quickly.
+      </p>
+    </div>
+  </div>
+
+  <div class="cs-section">
+    <h2>Outcome & Reflection</h2>
+    <p>
+      The 3-day-to-under-1-hour improvement was the headline metric, but the more meaningful
+      change was that analysts stopped being the bottleneck. Before, every new question from
+      leadership required a manual data pull. After, the data is always there — Athena-queryable,
+      partitioned, governed — and new dashboards are a QuickSight configuration, not a three-day
+      extraction task.
+    </p>
+    <p>
+      The hardest part of the project wasn't the AWS architecture — it was understanding what
+      the data actually meant. CEPI, MSDS, and district SIS systems use overlapping identifiers
+      and slightly different schema conventions for the same concepts (e.g., "enrollment date"
+      means different things in different systems). The Glue DataBrew profiling step was where
+      most of the real work happened: understanding the shape and quality of each source before
+      writing a single join.
+    </p>
+  </div>
+
+</CaseStudy>

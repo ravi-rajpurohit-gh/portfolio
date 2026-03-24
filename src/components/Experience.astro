@@ -60,13 +60,22 @@ import { roles, education } from '../data/experience';
             </div>
 
             <!-- Bullet points -->
-            <ul class="space-y-2 list-disc list-inside">
+            <ul class="space-y-2 list-disc list-inside mb-4">
               {role.bullets.map((bullet) => (
                 <li class="text-sm text-[#a1a1a6] leading-relaxed marker:text-[#6e6e73]">
                   {bullet}
                 </li>
               ))}
             </ul>
+
+            {role.caseStudyUrl && (
+              <a
+                href={role.caseStudyUrl}
+                class="inline-block bg-accent hover:bg-[#0077ed] text-white text-sm font-medium px-4 py-2 rounded-full transition-colors"
+              >
+                Case Study →
+              </a>
+            )}
           </div>
         </div>
       ))}

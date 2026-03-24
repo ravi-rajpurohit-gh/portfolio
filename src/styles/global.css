@@ -27,14 +27,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Mermaid diagram container */
-.mermaid {
-  background: var(--bg-card);
-  border-radius: 12px;
-  padding: 2rem;
-  overflow-x: auto;
-}
-
 /* Scroll reveal */
 .reveal {
   opacity: 0;

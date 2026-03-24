@@ -23,6 +23,8 @@ export interface Role {
   bullets: string[];
   /** Renders a blue dot on the timeline. Set true only for the current role. */
   accent: boolean;
+  /** Optional: links a "Case Study →" button on this card to a case study page. */
+  caseStudyUrl?: string;
 }
 
 export interface Degree {
@@ -38,6 +40,7 @@ export const roles: Role[] = [
     company: 'State of Michigan — Ottawa Area ISD',
     period: 'Jan 2025 – Present',
     accent: true,
+    caseStudyUrl: '/projects/michigan-data-lake',
     bullets: [
       'Designed aggregate data layer on AWS (S3, Glue, Athena) consolidating 15+ siloed sources — cut executive report generation from 3 days to under 1 hour.',
       'Built ELT pipelines in Python and PySpark processing 5M+ daily records with 40% latency reduction.',
@@ -71,6 +74,7 @@ export const roles: Role[] = [
     company: 'KaHa Technologies',
     period: 'Jan 2020 – Jul 2022',
     accent: false,
+    caseStudyUrl: '/projects/kaha-wearables',
     bullets: [
       'Built end-to-end pipelines on Python + AWS processing 2B+ monthly events for 10M+ wearable users.',
       'Deployed Kafka architecture for real-time telemetry ingestion, reducing data lag to under 5 seconds.',
