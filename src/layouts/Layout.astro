@@ -17,6 +17,7 @@
  */
 
 import '../styles/global.css';
+import ParticleBackground from '../components/ParticleBackground.astro';
 
 interface Props {
   title?: string;
@@ -40,7 +41,10 @@ const {
     <title>{title}</title>
   </head>
   <body>
-    <slot />
+    <ParticleBackground />
+    <div style="position:relative;z-index:1;">
+      <slot />
+    </div>
 
     <script>
       /**
