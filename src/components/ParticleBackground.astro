@@ -1,0 +1,192 @@
+---
+/**
+ * PARTICLE BACKGROUND — src/components/ParticleBackground.astro
+ * ==============================================================
+ * Subtle canvas-based dot animation on the homepage.
+ *
+ * Behavior:
+ *   - 70 small dots drift slowly across the canvas
+ *   - Thin lines are drawn between dots within 130px of each other
+ *   - Mouse hover gently repels nearby particles (within 120px)
+ *   - Very low opacity to stay out of the way of content
+ *
+ * Performance:
+ *   - Pauses via IntersectionObserver when canvas is off-screen
+ *   - Resizes with window (debounced)
+ *   - All logic is in a single requestAnimationFrame loop
+ *
+ * Added to: src/layouts/Layout.astro (homepage only)
+ * Not used on case study pages (CaseStudy.astro)
+ */
+---
+
+<canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+<style>
+  #particle-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+</style>
+
+<script>
+  (() => {
+    const canvas = document.getElementById('particle-canvas') as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d')!;
+
+    const PARTICLE_COUNT = 70;
+    const CONNECTION_DISTANCE = 130;
+    const MOUSE_REPEL_DISTANCE = 120;
+    const MOUSE_REPEL_STRENGTH = 0.6;
+    const DOT_OPACITY = 0.35;
+    const LINE_OPACITY = 0.12;
+    const SPEED = 0.3;
+
+    // Accent blue to match the portfolio palette
+    const DOT_COLOR = '41, 151, 255';
+    const LINE_COLOR = '41, 151, 255';
+
+    interface Particle {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      radius: number;
+    }
+
+    let width = 0;
+    let height = 0;
+    let particles: Particle[] = [];
+    let mouse = { x: -9999, y: -9999 };
+    let animating = true;
+    let rafId = 0;
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+
+    function randomParticle(): Particle {
+      const angle = Math.random() * Math.PI * 2;
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: Math.cos(angle) * SPEED * (0.5 + Math.random() * 0.5),
+        vy: Math.sin(angle) * SPEED * (0.5 + Math.random() * 0.5),
+        radius: 1.5 + Math.random() * 1.5,
+      };
+    }
+
+    function init() {
+      resize();
+      particles = Array.from({ length: PARTICLE_COUNT }, randomParticle);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Update positions and apply mouse repulsion
+      for (const p of particles) {
+        // Mouse repulsion
+        const dx = p.x - mouse.x;
+        const dy = p.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < MOUSE_REPEL_DISTANCE && dist > 0) {
+          const force = (MOUSE_REPEL_DISTANCE - dist) / MOUSE_REPEL_DISTANCE;
+          p.vx += (dx / dist) * force * MOUSE_REPEL_STRENGTH * 0.05;
+          p.vy += (dy / dist) * force * MOUSE_REPEL_STRENGTH * 0.05;
+        }
+
+        // Speed damping — prevent runaway acceleration
+        const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+        if (speed > SPEED * 3) {
+          p.vx = (p.vx / speed) * SPEED * 3;
+          p.vy = (p.vy / speed) * SPEED * 3;
+        }
+
+        // Gently drift speed back toward base speed
+        p.vx *= 0.999;
+        p.vy *= 0.999;
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Wrap at edges
+        if (p.x < -10) p.x = width + 10;
+        if (p.x > width + 10) p.x = -10;
+        if (p.y < -10) p.y = height + 10;
+        if (p.y > height + 10) p.y = -10;
+      }
+
+      // Draw connections
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i];
+          const b = particles[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < CONNECTION_DISTANCE) {
+            const alpha = LINE_OPACITY * (1 - dist / CONNECTION_DISTANCE);
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = `rgba(${LINE_COLOR}, ${alpha})`;
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw dots
+      for (const p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${DOT_COLOR}, ${DOT_OPACITY})`;
+        ctx.fill();
+      }
+    }
+
+    function loop() {
+      if (!animating) return;
+      draw();
+      rafId = requestAnimationFrame(loop);
+    }
+
+    // Pause animation when not visible (tab switch, scroll far down)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        animating = entry.isIntersecting;
+        if (animating) loop();
+        else cancelAnimationFrame(rafId);
+      },
+      { threshold: 0 }
+    );
+    observer.observe(canvas);
+
+    // Track mouse position
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    window.addEventListener('mouseleave', () => {
+      mouse.x = -9999;
+      mouse.y = -9999;
+    });
+
+    // Debounced resize
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 150);
+    });
+
+    init();
+    loop();
+  })();
+</script>

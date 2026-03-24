@@ -1,0 +1,165 @@
+---
+import CaseStudy from '../../layouts/CaseStudy.astro';
+
+const diagPlatform = `flowchart LR
+    subgraph Devices ["10M+ Wearable Devices"]
+        A["Health Sensors\\nHR · SpO2 · Steps\\nAccelerometer · Sleep"]
+    end
+
+    subgraph Ingestion ["Real-time Ingestion"]
+        B["Apache Kafka\\n2B+ events/month\\nunder 5s lag"]
+    end
+
+    subgraph Processing ["Stream and Batch Processing"]
+        C["Python Consumers\\nEvent normalization\\nStream aggregation"]
+        D["AWS Lambda\\nEvent-driven handlers\\nAlert triggers"]
+    end
+
+    subgraph Storage ["Data Layer"]
+        E[("MongoDB\\nHealth time-series\\nUser + device profiles")]
+        F[("DynamoDB\\n10k concurrent requests\\nSession and device state")]
+        G[/"S3\\nRaw event archive\\nBatch replay buffer"/]
+    end
+
+    subgraph ML ["Analytics and ML"]
+        H["Feature Pipelines\\nPython · NumPy · Pandas"]
+        I["ML Model Serving\\nHealth insight inference\\nAnomaly detection"]
+        J["Health Analytics\\nUser-facing dashboards\\nPartner reporting"]
+    end
+
+    A -->|"real-time"| B
+    B --> C & D
+    C --> E & G
+    D --> F
+    E & G --> H
+    H --> I & J
+
+    style B fill:#2997ff,color:#fff,stroke:#0077ed`;
+
+const diagDataFlow = `flowchart TD
+    RAW["Raw Sensor Events\\nPulse · motion · SpO2\\nhigh-frequency, unvalidated"]
+    --> KAFKA["Kafka Topic\\nPartitioned by device_id"]
+    --> CONSUMER["Python Consumer\\nParse · validate · normalize"]
+    --> BRANCH{Event type}
+
+    BRANCH -->|"health metric"| MONGO["MongoDB\\ntime-series collection\\nindexed by user_id + timestamp"]
+    BRANCH -->|"session state"| DYNAMO["DynamoDB\\ndevice + session state\\nlow-latency reads"]
+    BRANCH -->|"raw archive"| S3["S3\\nParquet — daily partitions\\nbatch ML training data"]
+
+    MONGO & S3 --> FEATURE["Feature Extraction\\nwindowed aggregations\\nPandas + NumPy"]
+    FEATURE --> MODEL["ML Inference\\nhealth score · anomaly flag\\nrecovery index"]`;
+---
+
+<CaseStudy
+  title="KaHa Wearable Platform"
+  subtitle="The data infrastructure behind a health wearable platform serving 10M+ users — Kafka ingestion at 2B+ events/month, Python stream processing, and a multi-store data layer built for real-time ML inference."
+  tags={['Apache Kafka', 'Python', 'AWS', 'MongoDB', 'DynamoDB', 'NumPy', 'Pandas']}
+  githubUrl=""
+>
+
+  <div class="cs-section">
+    <h2>Context</h2>
+    <p>
+      KaHa Technologies builds the firmware and data platform that powers white-label health
+      wearables — smartwatches and fitness bands sold under various consumer brands. The platform
+      sits between the device and whatever health app the brand has built: it ingests raw
+      sensor data, processes it, runs ML inference for health insights, and delivers results
+      to the brand's app in near real-time.
+    </p>
+    <p>
+      At the time I joined, the platform was scaling fast — device activations were growing and
+      the existing architecture was starting to show lag. The job was to build an ingestion and
+      processing layer that could handle 2B+ monthly events across 10M+ active devices without
+      data lag exceeding 5 seconds.
+    </p>
+  </div>
+
+  <div class="cs-section">
+    <h2>Platform Architecture</h2>
+    <p>
+      Devices publish sensor events to Kafka. Python consumers process the stream in near real-time,
+      routing each event type to the right datastore. A separate batch layer handles feature extraction
+      for ML model training and serving.
+    </p>
+    <pre class="mermaid" set:text={diagPlatform}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Data Flow Detail</h2>
+    <p>
+      Every raw event passes through the same normalization step before branching — this keeps
+      the storage layer clean regardless of device firmware version or sensor calibration differences
+      between hardware partners.
+    </p>
+    <pre class="mermaid" set:text={diagDataFlow}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Key Engineering Decisions</h2>
+
+    <div class="adr-card">
+      <span class="decision">Decision #1 — Message Queue</span>
+      <h3>Why Kafka over SQS or direct writes?</h3>
+      <p>
+        Direct writes to a database at 2B events/month create a thundering herd problem —
+        spikes in device activity (morning workouts, sleep tracking start times) create write
+        bursts that overwhelm any single datastore. Kafka absorbs those spikes. Consumer lag
+        becomes visible and manageable; the datastore never sees raw burst load. SQS could
+        absorb bursts too, but Kafka's log retention and consumer group model gave us the
+        ability to replay events for ML retraining and to onboard new consumers (e.g., a new
+        analytics pipeline) without touching the producers. That replay capability paid off
+        several times during model iteration.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #2 — Storage Split</span>
+      <h3>Why MongoDB + DynamoDB + S3 instead of one datastore?</h3>
+      <p>
+        The three data access patterns are genuinely different. Health time-series (heart rate
+        over a 30-day window, sleep stages per night) maps naturally to MongoDB's document model
+        with time-indexed collections. Session and device state (is this device online? what's
+        its last sync timestamp?) needs single-digit millisecond reads — that's DynamoDB's job.
+        Raw event archive for ML batch training doesn't need low latency at all; it needs cheap,
+        durable storage with efficient range reads — that's S3 Parquet. Forcing any one of these
+        patterns into a general-purpose datastore would have meant either overpaying or accepting
+        worse performance on two of the three use cases.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #3 — Feature Extraction</span>
+      <h3>Why batch feature extraction over in-stream computation?</h3>
+      <p>
+        The ML models for health insights (recovery index, activity classification, anomaly
+        detection) require windowed features — heart rate variability over the past hour, step
+        count compared to a 7-day baseline. Computing these windows in-stream is theoretically
+        possible but adds significant state management complexity to the consumer. In practice,
+        the insight latency requirement was minutes, not seconds — users don't need their
+        recovery score the instant they wake up; they need it by the time they open the app.
+        Batch feature extraction on S3 Parquet archives kept the stream consumers simple and
+        made the feature engineering code easy to iterate on without touching the ingestion layer.
+      </p>
+    </div>
+  </div>
+
+  <div class="cs-section">
+    <h2>Scale and Constraints</h2>
+    <p>
+      The hardest constraint wasn't raw throughput — Kafka handles that. It was device heterogeneity.
+      KaHa's platform runs on hardware from multiple OEM partners, each with slightly different
+      sensor firmware, sampling rates, and data formats. The normalization layer in the Python
+      consumer had to handle all of these consistently, and new device variants showed up
+      regularly. Keeping that logic maintainable — without making every new device a production
+      incident — required disciplined schema versioning and a test suite that covered the
+      known edge cases from each hardware partner.
+    </p>
+    <p>
+      The 5-second lag target sounds easy until you account for device connectivity patterns.
+      Wearables aren't always online — they buffer locally and sync in batches when a phone
+      is nearby. The pipeline had to handle out-of-order events gracefully, since a batch of
+      buffered readings from 20 minutes ago arriving at once is normal, not an error.
+    </p>
+  </div>
+
+</CaseStudy>
