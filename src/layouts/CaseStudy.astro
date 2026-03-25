@@ -33,6 +33,7 @@
  */
 
 import '../styles/global.css';
+import ParticleBackground from '../components/ParticleBackground.astro';
 
 interface Props {
   title: string;
@@ -65,7 +66,7 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
         startOnLoad: true,
         theme: 'base',
         securityLevel: 'loose',
-        flowchart: { useMaxWidth: false },
+        flowchart: { useMaxWidth: false, nodeSpacing: 50, rankSpacing: 60 },
         er: { useMaxWidth: false },
         themeVariables: {
           background: '#1c1c1e',
@@ -88,6 +89,8 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
     </script>
   </head>
   <body>
+    <ParticleBackground />
+    <div style="position:relative;z-index:1;">
 
     <!-- Minimal sticky nav for case study pages -->
     <nav style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);border-bottom:1px solid #2d2d2f;">
@@ -144,6 +147,8 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
         ← Back to all work
       </a>
     </footer>
+
+    </div><!-- end z-index wrapper -->
   </body>
 </html>
 
@@ -166,6 +171,15 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
 
   .cs-nav-logo:hover {
     color: #2997ff;
+  }
+
+  /* Extra breathing room inside Mermaid node boxes */
+  .mermaid .nodeLabel {
+    padding: 6px 14px !important;
+  }
+
+  .mermaid .label {
+    padding: 6px 10px !important;
   }
 
   /* Mermaid diagram container — center SVG output and allow horizontal scroll */

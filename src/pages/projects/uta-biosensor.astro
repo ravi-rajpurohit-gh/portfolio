@@ -1,0 +1,174 @@
+---
+import CaseStudy from '../../layouts/CaseStudy.astro';
+
+const diagPipeline = `flowchart LR
+    subgraph Sensor ["Data Collection"]
+        A["PPG Sensor\\n200Hz sampling\\nwrist-worn device"]
+        B["Electrodermal\\nActivity Sensor\\nconductance signal"]
+    end
+
+    subgraph Processing ["Signal Processing"]
+        C["Bandpass Filter\\nNoise removal\\n0.5 – 4 Hz band"]
+        D["Peak Detection\\nR-R interval extraction\\nPandas + SciPy"]
+    end
+
+    subgraph Features ["Feature Extraction"]
+        E["Time-Domain HRV\\nSDNN · RMSSD\\npNN50"]
+        F["Frequency-Domain HRV\\nLF power · HF power\\nLF/HF ratio"]
+        G["Non-linear Features\\nPoincare plot metrics\\nSampEn"]
+    end
+
+    subgraph Orchestration ["Pipeline Orchestration"]
+        H["Apache Airflow\\nScheduled DAGs\\n35% latency reduction"]
+    end
+
+    subgraph Output ["Research Output"]
+        I["Structured Dataset\\nParquet — analysis-ready\\nML training splits"]
+        J["ML Inference\\nStress classification\\nRecovery state prediction"]
+        K["Research Notebooks\\nStatistical analysis\\nVisualization"]
+    end
+
+    A & B --> C --> D
+    D --> E & F & G
+    E & F & G --> H
+    H --> I
+    I --> J & K
+
+    style I fill:#2997ff,color:#fff,stroke:#0077ed`;
+
+const diagAirflow = `flowchart TD
+    T1["Sensor Ingest Task\\nread raw .csv recording\\nvalidate file integrity"]
+    --> T2["Signal Processing Task\\nbandpass filter\\nR-R interval detection"]
+    --> T3["Feature Extraction Task\\ntime + frequency domain HRV\\nwindowed aggregations"]
+    --> T4["Quality Gate\\nflag low-signal recordings\\nSNR threshold check"]
+    --> T5{Pass?}
+
+    T5 -->|"yes"| T6["Write Parquet\\npartitioned by subject + session\\nML-ready schema"]
+    T5 -->|"no"| T7["Flag for Review\\nlog to metadata store\\nalert research team"]
+
+    T6 --> T8["Update Feature Store\\nappend to training dataset\\nversion-controlled"]
+
+    style T6 fill:#2997ff,color:#fff,stroke:#0077ed
+    style T7 fill:#ff453a,color:#fff,stroke:#d70015`;
+---
+
+<CaseStudy
+  title="Biosensor Data Pipeline"
+  subtitle="A high-frequency signal processing and feature extraction pipeline for wearable PPG sensor data — built to support HRV-based stress and recovery research at 200Hz, orchestrated with Apache Airflow."
+  tags={['Apache Airflow', 'Python', 'Pandas', 'NumPy', 'SciPy', 'Parquet', 'SQL']}
+>
+
+  <div class="cs-section">
+    <h2>Research Context</h2>
+    <p>
+      Heart Rate Variability (HRV) — the variation in time between consecutive heartbeats —
+      has become one of the most studied markers in wearable health research. When measured
+      reliably, it correlates with autonomic nervous system state: stress, fatigue, and recovery
+      all leave a measurable signature in HRV. The challenge is that the raw signal is noisy,
+      high-frequency, and full of artifacts. Getting from a wrist-worn PPG recording to a
+      clean, analysis-ready dataset requires a pipeline that handles signal quality, feature
+      engineering, and reproducibility rigorously.
+    </p>
+    <p>
+      At UT Arlington, I built this pipeline to support multiple ongoing research threads —
+      different experiments, different sensor setups, different feature sets — while keeping
+      the data layer consistent enough that downstream ML models could be retrained without
+      reimplementing preprocessing from scratch.
+    </p>
+  </div>
+
+  <div class="cs-section">
+    <h2>Pipeline Architecture</h2>
+    <p>
+      Raw PPG recordings at 200Hz flow through a signal processing stage, a multi-domain
+      feature extraction step, and Airflow-orchestrated scheduling into a versioned Parquet
+      dataset — ready for ML training or statistical analysis.
+    </p>
+    <pre class="mermaid" set:text={diagPipeline}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Airflow DAG Design</h2>
+    <p>
+      Each pipeline run is a DAG. The quality gate at the end of signal processing is the
+      critical decision point: recordings with poor signal-to-noise ratio (motion artifacts,
+      loose sensor contact) are flagged rather than silently passed through. Downstream
+      models trained on corrupted features produce unreliable results, so failing loudly
+      is better than failing quietly.
+    </p>
+    <pre class="mermaid" set:text={diagAirflow}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Key Engineering Decisions</h2>
+
+    <div class="adr-card">
+      <span class="decision">Decision #1 — Sampling and Windowing</span>
+      <h3>Why 200Hz, and how were HRV windows computed?</h3>
+      <p>
+        PPG-based R-R interval detection requires sufficient temporal resolution to accurately
+        locate pulse peaks — 200Hz provides roughly 5ms resolution, which is adequate for
+        HRV features in the 0–0.4 Hz frequency range of interest. Lower sampling rates
+        introduce peak-timing errors that propagate directly into HRV metrics.
+        HRV features were computed over 5-minute non-overlapping windows — the clinically
+        standard window for short-term HRV analysis — allowing comparison across experiments
+        with different session lengths while keeping the feature schema consistent.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #2 — Orchestration</span>
+      <h3>Why Apache Airflow over cron scripts or a Jupyter-based workflow?</h3>
+      <p>
+        The research team ran multiple experiments in parallel — each producing sensor
+        recordings on different schedules, with different subjects and session lengths.
+        Cron scripts would have required manual coordination and offered no visibility
+        into which runs succeeded, failed, or were still pending. Jupyter-based workflows
+        are reproducible in principle but brittle in practice when multiple people share
+        an environment. Airflow gave the team a shared view of pipeline state, dependency
+        tracking between tasks, and automatic retry on transient failures (intermittent
+        file system access, flaky sensor file formats). The 35% latency reduction came
+        from parallelizing the per-subject feature extraction tasks across workers,
+        which cron scripts cannot do without significant custom code.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #3 — Feature Storage</span>
+      <h3>Why Parquet over CSV for the feature store?</h3>
+      <p>
+        Biosensor research datasets accumulate quickly — each subject, session, and
+        experiment adds more rows, and ML training requires reading large subsets by
+        subject ID, session date, or experiment label. Parquet with partitioning on
+        these columns makes those reads fast without loading the full dataset.
+        It also enforces schema consistency: CSV files silently accept column mismatches;
+        Parquet does not. For a research codebase shared across multiple team members
+        running different analysis scripts, enforced schema was a meaningful reliability
+        improvement.
+      </p>
+    </div>
+  </div>
+
+  <div class="cs-section">
+    <h2>Signal Challenges</h2>
+    <p>
+      The hardest part of PPG-based HRV isn't the math — it's the signal quality. Wrist-worn
+      PPG is significantly noisier than chest-based ECG: movement artifacts, loose sensor
+      contact, and skin tone variation all affect the signal. The peak detection algorithm
+      had to be robust to these, which meant implementing an adaptive threshold that adjusts
+      to signal amplitude rather than using a fixed cutoff. Recordings with sustained artifacts
+      — where the R-R series was unreliable for more than 20% of the window — were flagged
+      at the quality gate and excluded from the training dataset. This kept the feature
+      store clean but required careful documentation of exclusion rates per experiment
+      to avoid selection bias in the ML results.
+    </p>
+    <p>
+      The frequency-domain features (LF/HF ratio) are computed via FFT on the R-R interval
+      series, which requires a uniformly-sampled signal. Since R-R intervals are unevenly
+      spaced by nature, the pipeline included an interpolation step (cubic spline, resampled
+      at 4Hz) before the frequency analysis — a detail that's easy to skip in an ad-hoc
+      notebook but critical for accurate results.
+    </p>
+  </div>
+
+</CaseStudy>
