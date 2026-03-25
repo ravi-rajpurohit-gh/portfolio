@@ -93,7 +93,7 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
     <div style="position:relative;z-index:1;">
 
     <!-- Minimal sticky nav for case study pages -->
-    <nav style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);border-bottom:1px solid #2d2d2f;">
+    <nav style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(0,0,0,0.45);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,0.08);">
       <div style="max-width:900px;margin:0 auto;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
         <a href="/" style="color:#a1a1a6;font-size:0.875rem;text-decoration:none;">← Back</a>
         <a href="/" class="cs-nav-logo">ꝚꝚ</a>
@@ -242,8 +242,10 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
 
   /* ADR card: one per key engineering decision */
   .adr-card {
-    background: #1c1c1e;
-    border: 1px solid #2d2d2f;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     padding: 1.5rem;
     margin-bottom: 1rem;
@@ -251,7 +253,7 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
   }
 
   .adr-card:hover {
-    border-color: #3d3d3f;
+    border-color: rgba(255, 255, 255, 0.14);
   }
 
   .adr-card h3 {
