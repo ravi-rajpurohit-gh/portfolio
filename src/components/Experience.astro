@@ -49,14 +49,9 @@ import { roles, education } from '../data/experience';
 
           <!-- Role card -->
           <div class="bg-[#1c1c1e] border border-[#2d2d2f] rounded-2xl p-6 hover:border-[#3d3d3f] transition-colors">
-            <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
-              <div>
-                <h3 class="text-[#f5f5f7] font-semibold text-lg">{role.title}</h3>
-                <p class="text-accent text-sm font-medium mt-0.5">{role.company}</p>
-              </div>
-              <span class="text-[#6e6e73] text-sm bg-[#0a0a0a] px-3 py-1 rounded-full border border-[#2d2d2f] whitespace-nowrap">
-                {role.period}
-              </span>
+            <div class="mb-3">
+              <h3 class="text-[#f5f5f7] font-semibold text-lg">{role.title}</h3>
+              <p class="text-accent text-sm font-medium mt-0.5">{role.company}</p>
             </div>
 
             <!-- Bullet points -->
