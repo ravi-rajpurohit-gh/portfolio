@@ -60,14 +60,19 @@ const diagAPM = `flowchart LR
         K["By Scenario\\nBT toggle · sync · range events\\nP50 · P95 latencies"]
     end
 
+    L["Scheduled Job\\nDaily aggregation\\nauto-report generation"]
+    M["Email Delivery\\nQA Team + Stakeholders\\ndaily report"]
+
     B -->|"BLE events"| A
     A --> C & D & E
     C & D & E --> F
     F -->|"streaming export"| G
     G --> H
     H --> I & J & K
+    H --> L --> M
 
-    style G fill:#2997ff,color:#fff,stroke:#0077ed`;
+    style G fill:#2997ff,color:#fff,stroke:#0077ed
+    style M fill:#2997ff,color:#fff,stroke:#0077ed`;
 
 const diagDataFlow = `flowchart TD
     RAW["Raw Sensor Events\\nPulse · motion · SpO2\\nhigh-frequency, unvalidated"]
@@ -104,7 +109,9 @@ const diagDataFlow = `flowchart TD
       event on a Samsung Galaxy behaves differently from the same event on a Xiaomi or a
       Vivo — different OS versions, different BT stack implementations, different background
       process management policies. Without instrumented data across device segments, QA
-      could only test on the handsets they had in the office.
+      could only test on the handsets they had in the office. The goal was a fully automated
+      pipeline that ran daily and delivered a segmented performance report to QA and
+      stakeholders — no manual queries, no ad-hoc exports.
     </p>
   </div>
 
@@ -135,9 +142,10 @@ const diagDataFlow = `flowchart TD
       under different scenarios (toggle, out-of-range return, airplane mode recovery), sync
       duration by payload size, and mode-change response latency — and sends them to Firebase.
       BigQuery's native Firebase export streams these events into a queryable table within
-      minutes. SQL aggregations then segment performance by OS, device make, and model,
-      producing reports that tell QA exactly which device-OS combinations show degraded
-      performance and in which scenarios.
+      minutes. SQL aggregations segment performance by OS, device make, and model. A
+      scheduled job runs these aggregations daily and emails a formatted performance report
+      to the QA team and relevant stakeholders — replacing what had previously been ad-hoc
+      queries run whenever someone had time to look.
     </p>
     <pre class="mermaid" set:text={diagAPM}></pre>
   </div>

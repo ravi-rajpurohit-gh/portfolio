@@ -42,9 +42,11 @@ export const roles: Role[] = [
     accent: true,
     caseStudyUrl: '/projects/michigan-data-lake',
     bullets: [
-      'Designed aggregate data layer on AWS (S3, Glue, Athena) consolidating 15+ siloed sources — cut executive report generation from 3 days to under 1 hour.',
-      'Built ELT pipelines in Python and PySpark processing 5M+ daily records with 40% latency reduction.',
-      'Designed dimensional models (Star schema) and dashboards tracking engagement metrics and behavioral trends.',
+      'Designed aggregate data lake on AWS (S3, Glue, Athena, Lake Formation) consolidating 15+ siloed state and district sources — cut executive report generation from 3 days to under 1 hour.',
+      'Orchestrated all pipeline runs with AWS Step Functions — every load logged to DynamoDB on start and completion, with SNS alerts on success and failure, giving the team a full audit trail.',
+      'Built ELT pipelines in Python and PySpark processing 5M+ daily records, achieving 40% latency reduction through Parquet partitioning and pushdown predicate optimization.',
+      'Designed Star schema dimensional models and QuickSight dashboards tracking student engagement, enrollment trends, and behavioral metrics across districts.',
+      'Implemented column-level access control via Lake Formation so district staff see only their own data — without requiring separate deployments per district.',
     ],
   },
   {
@@ -54,9 +56,10 @@ export const roles: Role[] = [
     accent: false,
     caseStudyUrl: '/projects/uta-biosensor',
     bullets: [
-      'Built scalable pipelines for high-frequency sensor data at 200Hz, enabling ML inference for research teams.',
-      'Automated ETL workflows with Apache Airflow, reducing processing latency by 35%.',
-      'Built feature extraction tools in Pandas and NumPy to convert raw biosignal recordings into structured datasets for downstream analysis.',
+      'Built a signal processing and feature extraction pipeline for wearable PPG sensor data at 200Hz — producing time-domain and frequency-domain HRV features (SDNN, RMSSD, LF/HF) as input for ML stress and recovery models.',
+      'Orchestrated all pipeline runs with Apache Airflow DAGs, reducing end-to-end processing latency by 35% through parallel per-subject task execution.',
+      'Designed a signal quality gate in the Airflow DAG to flag low-SNR recordings before feature extraction — preventing corrupted inputs from reaching the ML training dataset.',
+      'Implemented cubic spline interpolation on R-R interval series before frequency analysis, ensuring accurate LF/HF ratio computation despite the uneven sampling inherent to PPG peak detection.',
     ],
   },
   {
@@ -66,9 +69,10 @@ export const roles: Role[] = [
     accent: false,
     caseStudyUrl: '/projects/nutanix-analytics',
     bullets: [
-      'Designed pipelines for 500GB+ of daily logs supporting Sales and Support analytics.',
-      'Integrated Prometheus and Splunk observability, maintaining 99.9% service availability.',
-      'Optimized SQL query performance by 50%, reducing compute costs on the Sales and Support analytics workloads.',
+      'Built GoLang REST API for performance analytics dashboards, deployed on Kubernetes via Jenkins CI/CD — automated testing ran on every git push, with rolling zero-downtime releases on merge.',
+      'Integrated the analytics platform into Nutanix IAM by registering it as a resource in the profile management identity structure, then used JWT for stateless token validation — eliminating the separate re-authentication that had been limiting daily adoption.',
+      'Implemented role-based access control at the query layer (not just the UI): Support engineers receive full log access; internal users see only their own component metrics.',
+      'Designed data pipelines ingesting 500GB+ of daily product telemetry through Prometheus (metrics) and Splunk (logs), with SQL aggregations achieving a 50% query performance improvement by routing each data type to the appropriate system.',
     ],
   },
   {
@@ -78,9 +82,11 @@ export const roles: Role[] = [
     accent: false,
     caseStudyUrl: '/projects/kaha-wearables',
     bullets: [
-      'Built end-to-end pipelines on Python + AWS processing 2B+ monthly events for 10M+ wearable users.',
-      'Deployed Kafka architecture for real-time telemetry ingestion, reducing data lag to under 5 seconds.',
-      'Maintained NoSQL datastores (MongoDB, DynamoDB) supporting 10k concurrent requests.',
+      'Built real-time health telemetry pipeline on Apache Kafka processing 2B+ monthly events from 10M+ wearable users, with end-to-end data lag under 5 seconds.',
+      'Designed a multi-store data layer: MongoDB for health time-series, DynamoDB for device/session state at 10k concurrent requests, and S3 Parquet for batch ML training — each store matched to its access pattern.',
+      'Built a Firebase + BigQuery APM pipeline to instrument app-to-device connection events (BT connect time, sync duration, mode toggles) across Android and iOS — segmented by phone make, model, and OS version to give QA actionable per-device performance data.',
+      'Automated daily performance reports delivered to QA team and stakeholders via scheduled BigQuery aggregation jobs, replacing ad-hoc manual analysis.',
+      'Implemented schema versioning and firmware-aware normalization in the Kafka consumer to handle concurrent device generations from multiple OEM hardware partners without production incidents.',
     ],
   },
 ];

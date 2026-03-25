@@ -186,13 +186,13 @@
       mouse.y = -9999;
     });
 
-    // Scroll influence — particles drift in scroll direction
+    // Scroll influence — particles drift opposite to scroll direction (parallax feel)
+    // Scrolling down (positive delta) → particles drift upward (negative vy)
     window.addEventListener('scroll', () => {
       const currentY = window.scrollY;
       const delta = currentY - lastScrollY;
       lastScrollY = currentY;
-      // Small impulse proportional to scroll speed, capped to avoid jumpiness
-      scrollImpulse = Math.max(-0.8, Math.min(0.8, delta * 0.015));
+      scrollImpulse = Math.max(-0.25, Math.min(0.25, -delta * 0.004));
     }, { passive: true });
 
     // Debounced resize
