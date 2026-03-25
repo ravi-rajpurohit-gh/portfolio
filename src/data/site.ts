@@ -59,8 +59,8 @@ export const site = {
   // Add a new entry here when you add a new section to index.astro.
   // href should match the section's `id` attribute prefixed with `#`.
   navLinks: [
-    { href: '#work',       label: 'Work' },
     { href: '#about',      label: 'About' },
+    { href: '#work',       label: 'Work' },
     { href: '#experience', label: 'Experience' },
     { href: '#writing',    label: 'Writing' },
     { href: '#contact',    label: 'Contact' },

@@ -48,7 +48,7 @@ import { roles, education } from '../data/experience';
           )}
 
           <!-- Role card -->
-          <div class="bg-[#1c1c1e] border border-[#2d2d2f] rounded-2xl p-6 hover:border-[#3d3d3f] transition-colors">
+          <div class="glass-card rounded-2xl p-6 transition-colors">
             <div class="mb-3">
               <h3 class="text-[#f5f5f7] font-semibold text-lg">{role.title}</h3>
               <p class="text-accent text-sm font-medium mt-0.5">{role.company}</p>
@@ -78,7 +78,7 @@ import { roles, education } from '../data/experience';
 
     <!-- Education — rendered from education[] in experience.ts -->
     {education.map((deg) => (
-      <div class="reveal mt-2 bg-[#1c1c1e] border border-[#2d2d2f] rounded-2xl p-6">
+      <div class="reveal mt-2 glass-card rounded-2xl p-6">
         <p class="text-[#6e6e73] text-xs uppercase tracking-widest font-medium mb-3">Education</p>
         <div class="flex flex-wrap justify-between gap-2">
           <div>
