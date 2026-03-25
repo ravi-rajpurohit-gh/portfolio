@@ -1,0 +1,194 @@
+---
+import CaseStudy from '../../layouts/CaseStudy.astro';
+
+const diagPipeline = `flowchart LR
+    subgraph Logs ["Log Sources — 500GB+ daily"]
+        A["Product Telemetry\\nAPI traces · error events\\nperformance counters"]
+        B["System Metrics\\nCPU · memory · latency\\nper-service timeseries"]
+    end
+
+    subgraph Collection ["Observability Layer"]
+        C["Prometheus\\nMetrics scraping\\ntime-series storage"]
+        D["Splunk\\nLog indexing\\nfull-text search"]
+    end
+
+    subgraph Processing ["Processing"]
+        E["Python ETL\\nAggregation + normalization\\nSQL query optimization"]
+        F["PostgreSQL\\nAggregated metrics store\\n50% query speedup"]
+    end
+
+    subgraph API ["Backend — GoLang"]
+        G["REST API\\nGo services\\nKubernetes-deployed"]
+    end
+
+    subgraph UI ["Analytics Dashboard"]
+        H["Performance Charts\\nlatency · throughput · error rate"]
+        I["Log Browser\\nfiltered by access level"]
+    end
+
+    A & B --> C & D
+    C & D --> E --> F
+    F --> G
+    G --> H & I
+
+    style F fill:#2997ff,color:#fff,stroke:#0077ed`;
+
+const diagAuth = `flowchart TD
+    U["User / Internal Team"]
+    --> GW["Auth Gateway"]
+
+    GW -->|"before: separate login required"| OLD["Isolated Analytics System\\nno SSO · duplicate credentials\\nfrictioned access"]
+
+    GW -->|"after: integrated"| IAM["Nutanix IAM\\nIdentity Provider\\nProfile Management resource added"]
+
+    IAM -->|"issues JWT"| API["GoLang API\\nstateless token validation\\nno session store needed"]
+
+    API --> RBAC{Role check}
+
+    RBAC -->|"Support Engineer"| FULL["Full Access\\nAll logs + metrics\\nQuery builder + export"]
+    RBAC -->|"Internal User"| FILTERED["Scoped View\\nOwn component data\\nread-only dashboard"]
+
+    style IAM fill:#2997ff,color:#fff,stroke:#0077ed
+    style OLD fill:#3a3a3c,color:#6e6e73,stroke:#2d2d2f`;
+
+const diagDeployment = `flowchart LR
+    DEV["Developer\\ncommits code"] --> JENKINS["Jenkins CI\\nbuild · test · lint"]
+    JENKINS -->|"on merge"| DOCKER["Docker image\\nGoLang service\\nmulti-stage build"]
+    DOCKER --> K8S["Kubernetes\\nrolling deployment\\nhealth checks"]
+    K8S --> SVC["Service\\nload-balanced\\nauto-scaled"]`;
+---
+
+<CaseStudy
+  title="Nutanix Analytics Platform"
+  subtitle="Redesigned the authentication layer for an internal analytics platform — replacing isolated credentials with a JWT-based IAM integration — then built role-based performance dashboards serving 500GB+ of daily log data."
+  tags={['GoLang', 'Kubernetes', 'Jenkins', 'JWT', 'Python', 'Prometheus', 'Splunk', 'SQL']}
+>
+
+  <div class="cs-section">
+    <h2>The Problem</h2>
+    <p>
+      Nutanix runs a large internal analytics system used by Support and Sales engineering
+      teams to monitor product performance — latency, error rates, throughput — across
+      customer deployments. The system was valuable, but it had an adoption problem:
+      it lived in an isolated auth domain. Every time an engineer wanted to check a
+      dashboard, they had to log in again with a separate set of credentials. For a
+      system that's most useful when accessed frequently and during incidents, that
+      friction was a real barrier.
+    </p>
+    <p>
+      The two-part engagement: fix the auth problem at the identity layer, then rebuild
+      the analytics and reporting surface so that different audiences — Support engineers
+      with full access and internal users with scoped access — saw the right data
+      without needing separate deployments.
+    </p>
+  </div>
+
+  <div class="cs-section">
+    <h2>Data Pipeline</h2>
+    <p>
+      500GB+ of daily logs from product telemetry and system metrics flow through
+      Prometheus and Splunk, aggregated in Python, stored in PostgreSQL, and served
+      via a GoLang REST API deployed on Kubernetes.
+    </p>
+    <pre class="mermaid" set:text={diagPipeline}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>IAM Integration and Role-Based Access</h2>
+    <p>
+      The auth fix required working with the IAM team to register the analytics platform
+      as a resource in Nutanix's profile management identity structure. Once the platform
+      was a recognized IAM resource, the GoLang API could issue and validate JWT tokens
+      against the central identity provider — eliminating the duplicate login without
+      building a custom SSO system.
+    </p>
+    <p>
+      Role assignment came from the IAM profile: Support engineers carried a role claim
+      that granted full log access; standard users got a scoped view of their own
+      component's metrics. The GoLang API enforces this at the query layer — not just
+      in the UI — so there's no path to accessing data above your role via a direct
+      API call.
+    </p>
+    <pre class="mermaid" set:text={diagAuth}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Deployment Pipeline</h2>
+    <p>
+      The GoLang services are containerized and deployed on Kubernetes with Jenkins
+      handling CI. Rolling deployments mean no downtime during releases — important
+      for a system that Support teams consult during live incidents.
+    </p>
+    <pre class="mermaid" set:text={diagDeployment}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Key Engineering Decisions</h2>
+
+    <div class="adr-card">
+      <span class="decision">Decision #1 — Auth Strategy</span>
+      <h3>Why JWT over session-based auth or OAuth flow?</h3>
+      <p>
+        The goal was to eliminate re-authentication, not build a new login system.
+        JWT fit naturally: the IAM provider issues a token at Nutanix login, the analytics
+        API validates it on each request, and nothing about the analytics platform needs
+        to store session state. Session-based auth would have required a shared session
+        store across GoLang service replicas — another piece of infrastructure to maintain.
+        OAuth would have been the right call for a customer-facing integration, but for
+        an internal tool with a well-defined identity provider, JWT token validation
+        is simpler and faster. Stateless validation also made the Kubernetes horizontal
+        scaling straightforward — any replica can validate any token without coordination.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #2 — GoLang for the Backend</span>
+      <h3>Why Go over Python or Java for the API layer?</h3>
+      <p>
+        The API handles concurrent requests from multiple internal teams, often spiking
+        during incidents when everyone wants the same dashboard at once. Go's goroutine
+        model handles concurrent connections efficiently without the overhead of thread-per-request
+        patterns. The compiled binary also produces a small Docker image compared to
+        a Python or JVM service, which matters for Kubernetes pod startup time during
+        scaling events. The static typing caught a meaningful number of integration
+        errors at compile time that would otherwise have surfaced as runtime failures
+        in a Python codebase.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #3 — Prometheus + Splunk Together</span>
+      <h3>Why run both instead of consolidating to one tool?</h3>
+      <p>
+        Prometheus and Splunk serve genuinely different use cases. Prometheus is optimized
+        for numeric time-series — CPU, latency, throughput — with efficient range queries
+        and alerting. Splunk is optimized for unstructured log text — stack traces, event
+        messages, full-text search. Replacing either with the other means either losing
+        the aggregation performance of Prometheus or losing the search flexibility of Splunk.
+        The 50% SQL query performance improvement came from understanding which data
+        lived in which system and routing queries accordingly, rather than running
+        log text through Prometheus or numeric aggregations through Splunk.
+      </p>
+    </div>
+  </div>
+
+  <div class="cs-section">
+    <h2>Outcome & Reflection</h2>
+    <p>
+      The IAM integration reduced the friction that was limiting how often engineers
+      actually used the system. The right data being one click away during an incident
+      is different from requiring a separate login — even if the data is identical.
+      The role-based access also meant Support teams could be given full log visibility
+      without exposing that same detail to all internal users, which simplified the
+      data governance conversation.
+    </p>
+    <p>
+      The SQL optimization work — which cut query times by 50% on the aggregated metrics
+      store — came largely from identifying queries that were doing full table scans
+      where an index scan was possible, and from pushing aggregation work into the
+      database layer rather than pulling raw rows into Python and aggregating in memory.
+      At 500GB+ of daily logs, the difference between those two approaches is substantial.
+    </p>
+  </div>
+
+</CaseStudy>

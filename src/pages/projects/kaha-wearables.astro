@@ -1,7 +1,7 @@
 ---
 import CaseStudy from '../../layouts/CaseStudy.astro';
 
-const diagPlatform = `flowchart LR
+const diagHealth = `flowchart LR
     subgraph Devices ["10M+ Wearable Devices"]
         A["Health Sensors\\nHR · SpO2 · Steps\\nAccelerometer · Sleep"]
     end
@@ -24,7 +24,7 @@ const diagPlatform = `flowchart LR
     subgraph ML ["Analytics and ML"]
         H["Feature Pipelines\\nPython · NumPy · Pandas"]
         I["ML Model Serving\\nHealth insight inference\\nAnomaly detection"]
-        J["Health Analytics\\nUser-facing dashboards\\nPartner reporting"]
+        J["Health Dashboards\\nUser-facing metrics\\nPartner reporting"]
     end
 
     A -->|"real-time"| B
@@ -36,10 +36,43 @@ const diagPlatform = `flowchart LR
 
     style B fill:#2997ff,color:#fff,stroke:#0077ed`;
 
+const diagAPM = `flowchart LR
+    subgraph App ["Mobile Application"]
+        A["Companion App\\nAndroid + iOS\\nSamsung · Xiaomi · Apple · Vivo"]
+        B["Smartwatch\\nFirmware events\\nBLE communication"]
+    end
+
+    subgraph Events ["Performance Events Captured"]
+        C["BT Connect Time\\nby scenario + device"]
+        D["Data Sync Duration\\ntransfer timing · payload size"]
+        E["Mode Toggle Events\\nairplane · BT on/off\\nout of range + return"]
+    end
+
+    subgraph Pipeline ["Analytics Pipeline"]
+        F["Firebase Analytics\\nReal-time event ingestion\\nSDK-level instrumentation"]
+        G["BigQuery Export\\nNative Firebase connector\\nstreaming tables"]
+        H["SQL Aggregations\\nBigQuery + Python\\nsegmentation queries"]
+    end
+
+    subgraph Reports ["Performance Reports"]
+        I["By OS\\nAndroid vs iOS\\nperformance delta"]
+        J["By Device\\nMake + model breakdown\\nSamsung · Xiaomi · Apple · Vivo"]
+        K["By Scenario\\nBT toggle · sync · range events\\nP50 · P95 latencies"]
+    end
+
+    B -->|"BLE events"| A
+    A --> C & D & E
+    C & D & E --> F
+    F -->|"streaming export"| G
+    G --> H
+    H --> I & J & K
+
+    style G fill:#2997ff,color:#fff,stroke:#0077ed`;
+
 const diagDataFlow = `flowchart TD
     RAW["Raw Sensor Events\\nPulse · motion · SpO2\\nhigh-frequency, unvalidated"]
-    --> KAFKA["Kafka Topic\\nPartitioned by device_id"]
-    --> CONSUMER["Python Consumer\\nParse · validate · normalize"]
+    --> KAFKA["Kafka Topic\\nPartitioned by device_id\\nretention: 7 days"]
+    --> CONSUMER["Python Consumer\\nParse · validate · normalize\\nfirmware version routing"]
     --> BRANCH{Event type}
 
     BRANCH -->|"health metric"| MONGO["MongoDB\\ntime-series collection\\nindexed by user_id + timestamp"]
@@ -52,93 +85,123 @@ const diagDataFlow = `flowchart TD
 
 <CaseStudy
   title="KaHa Wearable Platform"
-  subtitle="The data infrastructure behind a health wearable platform serving 10M+ users — Kafka ingestion at 2B+ events/month, Python stream processing, and a multi-store data layer built for real-time ML inference."
-  tags={['Apache Kafka', 'Python', 'AWS', 'MongoDB', 'DynamoDB', 'NumPy', 'Pandas']}
-  githubUrl=""
+  subtitle="Two data pipelines at scale: a real-time health telemetry platform for 10M+ wearable users, and an application performance analytics system that diagnosed how BT connect time and sync duration varied across phone makes, models, and OS versions."
+  tags={['Apache Kafka', 'Python', 'AWS', 'MongoDB', 'DynamoDB', 'Firebase', 'BigQuery', 'NumPy']}
 >
 
   <div class="cs-section">
     <h2>Context</h2>
     <p>
       KaHa Technologies builds the firmware and data platform that powers white-label health
-      wearables — smartwatches and fitness bands sold under various consumer brands. The platform
-      sits between the device and whatever health app the brand has built: it ingests raw
-      sensor data, processes it, runs ML inference for health insights, and delivers results
-      to the brand's app in near real-time.
+      wearables — smartwatches and fitness bands sold under various consumer brands across
+      Southeast Asia and beyond. Two distinct data problems came with the scale: getting
+      health sensor data from 10M+ devices into ML-ready storage in under 5 seconds, and
+      understanding why the companion app behaved differently depending on what phone
+      a user was holding.
     </p>
     <p>
-      At the time I joined, the platform was scaling fast — device activations were growing and
-      the existing architecture was starting to show lag. The job was to build an ingestion and
-      processing layer that could handle 2B+ monthly events across 10M+ active devices without
-      data lag exceeding 5 seconds.
+      The second problem turned out to be more complex than it sounds. A Bluetooth connection
+      event on a Samsung Galaxy behaves differently from the same event on a Xiaomi or a
+      Vivo — different OS versions, different BT stack implementations, different background
+      process management policies. Without instrumented data across device segments, QA
+      could only test on the handsets they had in the office.
     </p>
   </div>
 
   <div class="cs-section">
-    <h2>Platform Architecture</h2>
+    <h2>Pipeline 1 — Health Telemetry Platform</h2>
     <p>
-      Devices publish sensor events to Kafka. Python consumers process the stream in near real-time,
-      routing each event type to the right datastore. A separate batch layer handles feature extraction
-      for ML model training and serving.
+      Devices publish sensor events to Kafka. Python consumers normalize and route each
+      event type to the right datastore. A separate batch layer handles feature extraction
+      for ML model training and inference.
     </p>
-    <pre class="mermaid" set:text={diagPlatform}></pre>
+    <pre class="mermaid" set:text={diagHealth}></pre>
   </div>
 
   <div class="cs-section">
     <h2>Data Flow Detail</h2>
     <p>
-      Every raw event passes through the same normalization step before branching — this keeps
-      the storage layer clean regardless of device firmware version or sensor calibration differences
-      between hardware partners.
+      Every raw event passes through the same normalization step before branching —
+      this keeps the storage layer clean regardless of device firmware version or
+      sensor calibration differences between hardware partners.
     </p>
     <pre class="mermaid" set:text={diagDataFlow}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Pipeline 2 — Application Performance Analytics</h2>
+    <p>
+      The companion app instruments every performance-relevant event — BT connection time
+      under different scenarios (toggle, out-of-range return, airplane mode recovery), sync
+      duration by payload size, and mode-change response latency — and sends them to Firebase.
+      BigQuery's native Firebase export streams these events into a queryable table within
+      minutes. SQL aggregations then segment performance by OS, device make, and model,
+      producing reports that tell QA exactly which device-OS combinations show degraded
+      performance and in which scenarios.
+    </p>
+    <pre class="mermaid" set:text={diagAPM}></pre>
   </div>
 
   <div class="cs-section">
     <h2>Key Engineering Decisions</h2>
 
     <div class="adr-card">
-      <span class="decision">Decision #1 — Message Queue</span>
-      <h3>Why Kafka over SQS or direct writes?</h3>
+      <span class="decision">Decision #1 — Kafka for Health Telemetry</span>
+      <h3>Why Kafka over SQS or direct writes to the datastore?</h3>
       <p>
-        Direct writes to a database at 2B events/month create a thundering herd problem —
-        spikes in device activity (morning workouts, sleep tracking start times) create write
-        bursts that overwhelm any single datastore. Kafka absorbs those spikes. Consumer lag
-        becomes visible and manageable; the datastore never sees raw burst load. SQS could
-        absorb bursts too, but Kafka's log retention and consumer group model gave us the
-        ability to replay events for ML retraining and to onboard new consumers (e.g., a new
-        analytics pipeline) without touching the producers. That replay capability paid off
-        several times during model iteration.
+        Direct writes at 2B events/month create a thundering herd problem — morning workout
+        spikes and sleep tracking start times produce write bursts that overwhelm any single
+        datastore. Kafka absorbs those spikes and makes consumer lag visible and manageable.
+        The log retention (7 days) was the other key reason: when a firmware update changed
+        the event schema, we could replay events through a new consumer version without
+        losing data. SQS doesn't support replay. That replay capability paid off multiple
+        times during firmware iteration cycles.
       </p>
     </div>
 
     <div class="adr-card">
-      <span class="decision">Decision #2 — Storage Split</span>
+      <span class="decision">Decision #2 — Three-Store Split for Health Data</span>
       <h3>Why MongoDB + DynamoDB + S3 instead of one datastore?</h3>
       <p>
-        The three data access patterns are genuinely different. Health time-series (heart rate
-        over a 30-day window, sleep stages per night) maps naturally to MongoDB's document model
-        with time-indexed collections. Session and device state (is this device online? what's
-        its last sync timestamp?) needs single-digit millisecond reads — that's DynamoDB's job.
-        Raw event archive for ML batch training doesn't need low latency at all; it needs cheap,
-        durable storage with efficient range reads — that's S3 Parquet. Forcing any one of these
-        patterns into a general-purpose datastore would have meant either overpaying or accepting
-        worse performance on two of the three use cases.
+        The three access patterns are genuinely different. Health time-series (heart rate
+        over 30 days, sleep stages per night) maps naturally to MongoDB's document model
+        with time-indexed collections. Session and device state (is this device online?
+        last sync timestamp?) needs single-digit millisecond reads — DynamoDB's job.
+        Raw event archive for ML batch training doesn't need low latency; it needs cheap,
+        durable storage with efficient range reads — S3 Parquet. Forcing any of these
+        into a general-purpose database would mean overpaying or accepting worse performance
+        on two of the three use cases.
       </p>
     </div>
 
     <div class="adr-card">
-      <span class="decision">Decision #3 — Feature Extraction</span>
-      <h3>Why batch feature extraction over in-stream computation?</h3>
+      <span class="decision">Decision #3 — Firebase + BigQuery for APM</span>
+      <h3>Why not Kafka for the performance analytics pipeline too?</h3>
       <p>
-        The ML models for health insights (recovery index, activity classification, anomaly
-        detection) require windowed features — heart rate variability over the past hour, step
-        count compared to a 7-day baseline. Computing these windows in-stream is theoretically
-        possible but adds significant state management complexity to the consumer. In practice,
-        the insight latency requirement was minutes, not seconds — users don't need their
-        recovery score the instant they wake up; they need it by the time they open the app.
-        Batch feature extraction on S3 Parquet archives kept the stream consumers simple and
-        made the feature engineering code easy to iterate on without touching the ingestion layer.
+        The health telemetry pipeline needs sub-5-second lag because it feeds real-time
+        ML inference. The APM pipeline has a different requirement: daily or weekly
+        aggregated reports for QA and product teams. The latency requirement is hours,
+        not seconds. Firebase's SDK handles client-side event batching and retry logic
+        out of the box — instrumentation that would take weeks to build on a custom
+        Kafka producer. The native BigQuery export means the data is queryable in SQL
+        without building a consumer or a schema registry. For a reporting pipeline where
+        freshness is measured in hours, Firebase + BigQuery is significantly less
+        infrastructure for the same output.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #4 — Device Segmentation in APM Reports</span>
+      <h3>Why segment by make + model + OS, not just aggregate?</h3>
+      <p>
+        Aggregate BT connection time looked acceptable. Segmented by device, it was not:
+        specific Xiaomi models running Android 12 showed 3x higher connect latency in
+        airplane-mode-recovery scenarios compared to the same event on Samsung. An aggregate
+        P95 latency number would have hidden this completely. The segmentation schema —
+        capturing device manufacturer, model, and OS version on every event — was designed
+        specifically so that QA could drill into failure modes by device segment rather
+        than debugging against a single test handset. This is what made the analytics
+        system actionable rather than just informational.
       </p>
     </div>
   </div>
@@ -146,19 +209,21 @@ const diagDataFlow = `flowchart TD
   <div class="cs-section">
     <h2>Scale and Constraints</h2>
     <p>
-      The hardest constraint wasn't raw throughput — Kafka handles that. It was device heterogeneity.
-      KaHa's platform runs on hardware from multiple OEM partners, each with slightly different
-      sensor firmware, sampling rates, and data formats. The normalization layer in the Python
-      consumer had to handle all of these consistently, and new device variants showed up
-      regularly. Keeping that logic maintainable — without making every new device a production
-      incident — required disciplined schema versioning and a test suite that covered the
-      known edge cases from each hardware partner.
+      The hardest constraint on the health telemetry side wasn't raw throughput — Kafka
+      handles that. It was device heterogeneity. KaHa's platform runs on hardware from
+      multiple OEM partners, each with slightly different sensor firmware, sampling rates,
+      and data formats. The normalization layer in the Python consumer had to handle all
+      of these consistently, and new device variants arrived regularly. Keeping that logic
+      maintainable without making every new device a production incident required disciplined
+      schema versioning and a test suite covering known edge cases from each hardware partner.
     </p>
     <p>
-      The 5-second lag target sounds easy until you account for device connectivity patterns.
-      Wearables aren't always online — they buffer locally and sync in batches when a phone
-      is nearby. The pipeline had to handle out-of-order events gracefully, since a batch of
-      buffered readings from 20 minutes ago arriving at once is normal, not an error.
+      The 5-second lag target is harder than it sounds when you account for device
+      connectivity patterns. Wearables aren't always online — they buffer locally and
+      sync in batches when a phone is nearby. The pipeline had to handle out-of-order
+      events gracefully: a batch of buffered readings arriving 20 minutes late is normal,
+      not an error. The Kafka log retention window of 7 days provided the buffer needed
+      to handle delayed delivery without data loss.
     </p>
   </div>
 

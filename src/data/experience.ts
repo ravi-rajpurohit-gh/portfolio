@@ -52,6 +52,7 @@ export const roles: Role[] = [
     company: 'University of Texas at Arlington',
     period: 'Aug 2024 – Jan 2025',
     accent: false,
+    caseStudyUrl: '/projects/uta-biosensor',
     bullets: [
       'Built scalable pipelines for high-frequency sensor data at 200Hz, enabling ML inference for research teams.',
       'Automated ETL workflows with Apache Airflow, reducing processing latency by 35%.',
@@ -63,6 +64,7 @@ export const roles: Role[] = [
     company: 'Nutanix',
     period: 'May 2023 – Aug 2023',
     accent: false,
+    caseStudyUrl: '/projects/nutanix-analytics',
     bullets: [
       'Designed pipelines for 500GB+ of daily logs supporting Sales and Support analytics.',
       'Integrated Prometheus and Splunk observability, maintaining 99.9% service availability.',

@@ -64,6 +64,8 @@
     let mouse = { x: -9999, y: -9999 };
     let animating = true;
     let rafId = 0;
+    let lastScrollY = window.scrollY;
+    let scrollImpulse = 0;
 
     function resize() {
       width = canvas.width = window.innerWidth;
@@ -89,8 +91,13 @@
     function draw() {
       ctx.clearRect(0, 0, width, height);
 
-      // Update positions and apply mouse repulsion
+      // Decay scroll impulse each frame
+      scrollImpulse *= 0.92;
+
+      // Update positions and apply mouse repulsion + scroll drift
       for (const p of particles) {
+        // Scroll influence — nudge particles in scroll direction
+        p.vy += scrollImpulse;
         // Mouse repulsion
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
@@ -178,6 +185,15 @@
       mouse.x = -9999;
       mouse.y = -9999;
     });
+
+    // Scroll influence — particles drift in scroll direction
+    window.addEventListener('scroll', () => {
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollY;
+      lastScrollY = currentY;
+      // Small impulse proportional to scroll speed, capped to avoid jumpiness
+      scrollImpulse = Math.max(-0.8, Math.min(0.8, delta * 0.015));
+    }, { passive: true });
 
     // Debounced resize
     let resizeTimer: ReturnType<typeof setTimeout>;
