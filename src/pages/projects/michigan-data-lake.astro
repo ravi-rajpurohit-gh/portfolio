@@ -48,20 +48,6 @@ const diagArchitecture = `flowchart TD
 
     style PROC fill:#2997ff,color:#fff,stroke:#0077ed`;
 
-const diagStepFunctions = `flowchart TD
-    Start([Start]) --> LS["Log Start\\nDynamoDB: PutItem"]
-    LS --> UE["Upload EEM to S3\\nLambda: Invoke"]
-    UE --> SC{Status Code Result}
-    SC -->|"2xx"| LUS["Log Update Success\\nDynamoDB: UpdateItem"]
-    SC -->|"4xx / 5xx"| LUF["Log Update Failure\\nDynamoDB: UpdateItem"]
-    LUS --> CP["Convert to Parquet\\nGlue: StartJobRun"]
-    CP --> ES["Email Success\\nSNS: Publish"]
-    ES --> End([Succeed])
-    LUF --> EF["Email Failure\\nSNS: Publish"]
-    EF --> Fail([Fail])
-
-    style End fill:#2997ff,color:#fff,stroke:#0077ed
-    style Fail fill:#ff453a,color:#fff,stroke:#d70015`;
 
 const diagBefore = `flowchart LR
     A["15+ siloed sources\\nCEPI · MSDS · MISCHOOL\\nDistrict SIS platforms"] -->|"manual export\\nper request"| B["Analyst\\nruns query"]
@@ -135,7 +121,17 @@ const diagAfter = `flowchart LR
       The state machine was designed so that failures don't silently disappear — the failure
       branch is just as explicit as the success branch, and both write to the same audit log.
     </p>
-    <pre class="mermaid" set:text={diagStepFunctions}></pre>
+    <!-- Real AWS Step Functions console export — light-themed artifact, shown on white background -->
+    <div style="background:#ffffff;border-radius:12px;padding:2rem;overflow-x:auto;display:flex;justify-content:center;margin-top:1.5rem;">
+      <img
+        src="/images/stepfunctions_graph.svg"
+        alt="AWS Step Functions state machine — data load orchestration"
+        style="max-width:100%;height:auto;display:block;"
+      />
+    </div>
+    <p style="color:#6e6e73;font-size:0.75rem;text-align:center;margin-top:0.75rem;">
+      AWS Step Functions console — actual production state machine
+    </p>
   </div>
 
   <div class="cs-section">
