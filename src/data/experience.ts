@@ -31,6 +31,8 @@ export interface Degree {
   degree: string;
   school: string;
   period: string;
+  /** Optional campus roles held while at this institution */
+  campusRoles?: { title: string; url?: string }[];
 }
 
 /** Work history — most recent first */
@@ -92,5 +94,10 @@ export const education: Degree[] = [
     degree: 'MS Computer Science',
     school: 'University of Texas at Arlington',
     period: '2022 – 2024',
+    campusRoles: [
+      { title: 'Python Tutor' },
+      { title: 'Staff Manager' },
+      { title: 'Chef — yes, really', url: 'https://drive.google.com/file/d/1VNMML9SCU_KENcqndlxAjtqMP5y43bFL/view?usp=sharing' },
+    ],
   },
 ];
