@@ -173,13 +173,37 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
     color: #2997ff;
   }
 
-  /* Extra breathing room inside Mermaid node boxes */
-  .mermaid .nodeLabel {
-    padding: 6px 14px !important;
+  /* ── Mermaid node polish ─────────────────────────────────────────── */
+
+  /* Rounded corners on rectangular nodes */
+  .mermaid .node rect {
+    rx: 10px;
+    ry: 10px;
   }
 
-  .mermaid .label {
-    padding: 6px 10px !important;
+  /* More rounded on subgraph cluster backgrounds */
+  .mermaid .cluster rect {
+    rx: 14px;
+    ry: 14px;
+  }
+
+  /* Center-align and breathe label text */
+  .mermaid .nodeLabel {
+    padding: 8px 16px !important;
+    text-align: center !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Remove default paragraph margin inside labels */
+  .mermaid .nodeLabel p {
+    margin: 0 !important;
+    line-height: 1.5 !important;
+    text-align: center !important;
+  }
+
+  /* Edge label backgrounds */
+  .mermaid .edgeLabel {
+    padding: 2px 6px !important;
   }
 
   /* Mermaid diagram container — center SVG output and allow horizontal scroll */
