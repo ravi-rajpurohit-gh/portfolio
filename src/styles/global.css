@@ -1,4 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Noto Sans — loaded specifically to cover R rotunda (U+A75A, U+A75B) which Inter lacks.
+   The text= param forces Google to serve these glyphs even outside the standard latin-ext subset.
+   Browser glyph fallback then uses Noto Sans automatically for these characters site-wide. */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@700&text=ꝚꝛꝘꝙ&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -22,7 +26,7 @@ html {
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Noto Sans', 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

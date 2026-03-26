@@ -96,7 +96,9 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
     <nav style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(0,0,0,0.45);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,0.08);">
       <div style="max-width:900px;margin:0 auto;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
         <a href="/" style="color:#a1a1a6;font-size:0.875rem;text-decoration:none;">← Back</a>
-        <a href="/" class="cs-nav-logo">ꝚꝚ</a>
+        <a href="/" class="cs-nav-logo" style="line-height:0;">
+          <img src="/favicon.svg" alt="RR" width="28" height="28" style="border-radius:6px;display:block;">
+        </a>
       </div>
     </nav>
 
@@ -161,16 +163,14 @@ const { title, subtitle, tags, liveUrl, githubUrl, mediumUrl } = Astro.props;
    * .adr-card    — Architectural Decision Record card
    */
 
-  /* RR logo link in the case study nav */
+  /* Logo link in the case study nav */
   .cs-nav-logo {
-    color: #f5f5f7;
-    font-weight: 600;
     text-decoration: none;
-    transition: color 0.2s;
+    transition: opacity 0.2s;
   }
 
   .cs-nav-logo:hover {
-    color: #2997ff;
+    opacity: 0.75;
   }
 
   /* ── Mermaid node polish ─────────────────────────────────────────── */

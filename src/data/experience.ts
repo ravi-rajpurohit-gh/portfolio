@@ -97,7 +97,7 @@ export const education: Degree[] = [
     campusRoles: [
       { title: 'Python Tutor' },
       { title: 'Staff Manager' },
-      { title: 'Chef — yes, really', url: 'https://drive.google.com/file/d/1VNMML9SCU_KENcqndlxAjtqMP5y43bFL/view?usp=sharing' },
+      { title: 'Chef', url: '/images/chef_pic.jpg' },
     ],
   },
 ];

@@ -1,5 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <rect width="32" height="32" rx="8" fill="#000000"/>
-  <text x="40%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="14" font-weight="700" fill="#2997ff">Ꝛ</text>
-  <text x="60%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="14" font-weight="700" fill="#2997ff">Ꝛ</text>
+  <!-- First R: stem + bowl + leg, drawn as pure paths — no font dependency -->
+  <path d="M3,27 L3,5 Q12,5 12,11 Q12,17 3,17 M9,17 L14,27"
+        stroke="#2997ff" stroke-width="2.2" fill="none"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Second R: same shape offset 14px right -->
+  <path d="M17,27 L17,5 Q26,5 26,11 Q26,17 17,17 M23,17 L28,27"
+        stroke="#2997ff" stroke-width="2.2" fill="none"
+        stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
