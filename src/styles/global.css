@@ -1,5 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* R rotunda (Ꝛ, U+A75A) — not in Inter or most mobile system fonts.
+   808-byte Noto Sans Bold woff2 subset containing only U+A750-U+A75F, fetched once
+   from Google Fonts and embedded as a data URI so it works offline, in any browser,
+   with no network request. unicode-range means this font is used ONLY for these
+   characters and has zero impact on any other glyph. */
+@font-face {
+  font-family: 'RR';
+  src: url('data:font/woff2;base64,d09GMgABAAAAAAMoAA8AAAAABhgAAALQAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGhYbHhxABmA/U1RBVFoARBEICnh/CwoAATYCJAMQBCAFhGwHIBsOBcgEHsi/8s3s7B6gfxJj7T/xx+4BlqniLlcFUEXuwDl1a9BpFADGO4L0QhV2wetBv8guWDuDmxGAM4ZPINWAwDTicyRY7BdVNU1jsUdNumw2iOzpSmSDRTyXMGfhYDcxVn1eRgrMItoG9S6ie5bRq4DP4B5XcqY8hxnkJjlRNjbmAjGdDFH3BelklsqspFTPkLYytDB7iMcdakeMqGUf2n9U8v+HoKxiM4i9BGMyQg6L7zQsCAT2mABvrT4JOb+t3Vjzx/OtRrsQiA5jVrcoRRKBLxZMh/aIsoPJ2CUpSrC2C4hseW4GlGqq8ijpjSItYI+9ntSOTv5/RFVZtD2feEzC1BdcEDYbbpLiQlzY0ytpQCLAojiJ4k+ilL+T2UXNdjE7z9h8+zYrbl3LmuQ42VE4bb4rVp4ZdnQcP2l453BbRrY1mx9XZy1NKZ5elx5VdyX1es6x4x6jFqc3lqWnR7x7kZ6yZTEA+1bzSprupizufTfDreibvcn0bjT+eMXNt/nbl3MuFf1b8h/HTyoZgWUdSl1x7kNOfv+W/F7j+AljOrivZDOThAI5m7jTbFTCA38W38wsUNH2u3LmLG3KQQqdFfY1K/DkOyux5z1rIo0LrCKYA6yZQDaAFrSXcSWHPL146aYkkRU4ErGVTbtFlOCMrwiWoo66Mu0ZjKaPHmbRSz2Gdq6bDubQQh+DY8e6mUAHVgzaXZ2u69pE2X1mYNDPEAWkkkqfltPppVUL9WLQkHuFIXRSaBnaaBYM+hjDLTdEMhVybTdWxqOLomjowL2nkUEKaaSTDbdoOq5NAf61kFpGMIJaCjmo8wX0DJWbjyxk8HAy/+NpZJCBxlja0bUpHN9IBt1CJzpzYIFy5l6IfER5c/vjLifQRsds41xmk8KcKwdTldTUV5YbIpVuSWdouV6SaZNEsVWni2TmbM3UfbGG+D8mKYdsu8ggAAAAAA==') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  unicode-range: U+A750-U+A75F;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -22,7 +35,7 @@ html {
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'RR', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

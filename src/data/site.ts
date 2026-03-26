@@ -62,6 +62,7 @@ export const site = {
     { href: '#about',      label: 'About' },
     { href: '#work',       label: 'Work' },
     { href: '#experience', label: 'Experience' },
+    { href: '#toolkit',    label: 'Toolkit' },
     { href: '#writing',    label: 'Writing' },
     { href: '#contact',    label: 'Contact' },
   ],

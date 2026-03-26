@@ -1,0 +1,104 @@
+---
+/**
+ * TOOLKIT — src/components/Toolkit.astro
+ * ========================================
+ * Grid of technology chips grouped by category.
+ *
+ * Icons are loaded from cdn.simpleicons.org using each tool's Simple Icons slug.
+ * The CDN serves single-color SVGs; we request the site's muted gray (#a1a1a6)
+ * so icons match the text label color at rest and brighten on hover together.
+ *
+ * Fallback behavior: if `icon` is omitted from the data, or if the CDN returns
+ * an error (wrong slug, network issue), the img is hidden and the chip renders
+ * as a text-only badge — no broken image indicator, no layout shift.
+ *
+ * Content comes from src/data/toolkit.ts → `toolkit` array.
+ * To add a tool: edit that file. No changes needed here.
+ *
+ * 5 groups are laid out in a 2-column grid. The last card spans both columns
+ * automatically when the count is odd, so Infrastructure & DevOps sits full-width.
+ */
+
+import { toolkit } from '../data/toolkit';
+
+// Icon color matches --text-secondary (#a1a1a6). On chip hover, CSS brightness
+// filter lifts the icon to feel like it's reacting with the text.
+const CDN = 'https://cdn.simpleicons.org';
+const ICON_COLOR = 'a1a1a6';
+---
+
+<section id="toolkit" class="py-24 px-6 border-t border-[#2d2d2f]">
+  <div class="max-w-6xl mx-auto">
+
+    <p class="reveal text-accent text-sm font-medium uppercase tracking-widest mb-4">Toolkit</p>
+    <h2 class="reveal text-4xl font-bold text-[#f5f5f7] mb-4">My Toolkit</h2>
+    <p class="reveal text-[#6e6e73] mb-16 max-w-xl">
+      Tools I reach for — and know well enough to have opinions about.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      {toolkit.map((group, i) => (
+        <div
+          class={`reveal glass-card rounded-2xl p-6 ${i === toolkit.length - 1 && toolkit.length % 2 !== 0 ? 'md:col-span-2' : ''}`}
+          style={`animation-delay:${i * 0.08}s`}
+        >
+          <p class="text-[#6e6e73] text-xs uppercase tracking-widest font-medium mb-4">
+            {group.label}
+          </p>
+
+          <div class="flex flex-wrap gap-2">
+            {group.tools.map((tool) => (
+              <div class="tool-chip">
+                {tool.icon && (
+                  <img
+                    src={`${CDN}/${tool.icon}/${ICON_COLOR}`}
+                    alt=""
+                    width="15"
+                    height="15"
+                    class="tool-icon"
+                    onerror="this.style.display='none'"
+                  />
+                )}
+                <span>{tool.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .tool-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.02);
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #a1a1a6;
+    transition: border-color 0.2s, color 0.2s;
+    cursor: default;
+  }
+
+  .tool-chip:hover {
+    border-color: rgba(41, 151, 255, 0.3);
+    color: #f5f5f7;
+  }
+
+  /* Lift icon brightness on chip hover to match the text brightening */
+  .tool-chip:hover .tool-icon {
+    filter: brightness(2);
+  }
+
+  .tool-icon {
+    display: block;
+    flex-shrink: 0;
+    transition: filter 0.2s;
+  }
+</style>
