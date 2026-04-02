@@ -98,9 +98,9 @@ export const education: Degree[] = [
     school: 'University of Texas at Arlington',
     period: '2022 – 2024',
     campusRoles: [
+      { title: 'Chef', url: '/images/chef_pic.jpg' },
       { title: 'Python Tutor' },
       { title: 'Staff Manager' },
-      { title: 'Chef', url: '/images/chef_pic.jpg' },
     ],
   },
 ];

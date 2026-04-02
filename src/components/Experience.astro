@@ -80,25 +80,24 @@ import { roles, education } from '../data/experience';
     {education.map((deg) => (
       <div class="reveal mt-2 glass-card rounded-2xl p-6">
         <p class="text-[#6e6e73] text-xs uppercase tracking-widest font-medium mb-3">Education</p>
-        <div class="flex flex-wrap justify-between gap-2 mb-4">
+        <div class="flex flex-wrap justify-between gap-4">
           <div>
             <p class="text-[#f5f5f7] font-semibold">{deg.degree}</p>
             <p class="text-accent text-sm">{deg.school}</p>
           </div>
-          <span class="text-[#6e6e73] text-sm">{deg.period}</span>
-        </div>
-        {deg.campusRoles && deg.campusRoles.length > 0 && (
-          <div class="border-t border-white/[0.06] pt-4">
-            <p class="text-[#6e6e73] text-xs uppercase tracking-widest font-medium mb-2">Also while there</p>
-            <div class="flex flex-wrap gap-2">
-              {deg.campusRoles.map((r) => (
-                r.url
-                  ? <a href={r.url} target="_blank" class="inline-block text-xs font-medium px-3 py-1 rounded-full border border-white/[0.08] text-[#a1a1a6] hover:text-accent hover:border-accent/40 transition-colors">{r.title} ↗</a>
-                  : <span class="inline-block text-xs font-medium px-3 py-1 rounded-full border border-white/[0.08] text-[#a1a1a6]">{r.title}</span>
-              ))}
+          {deg.campusRoles && deg.campusRoles.length > 0 && (
+            <div class="text-right">
+              <p class="text-[#6e6e73] text-xs uppercase tracking-widest font-medium mb-2">Also while there</p>
+              <div class="flex flex-wrap justify-end gap-2">
+                {deg.campusRoles.map((r) => (
+                  r.url
+                    ? <a href={r.url} target="_blank" class="inline-block text-xs font-medium px-3 py-1 rounded-full border border-white/[0.08] text-[#a1a1a6] hover:text-accent hover:border-accent/40 transition-colors">{r.title} ↗</a>
+                    : <span class="inline-block text-xs font-medium px-3 py-1 rounded-full border border-white/[0.08] text-[#a1a1a6]">{r.title}</span>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     ))}
 
