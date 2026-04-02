@@ -1,0 +1,216 @@
+---
+import CaseStudy from '../../layouts/CaseStudy.astro';
+
+const diagFlow = `flowchart LR
+    API["External API\\n(Learner Activity Logs)"]
+    SM["AWS Secrets Manager\\n(API Key at runtime)"]
+    PY["Matillion\\nPython Script\\n(paginated fetch)"]
+    S3["AWS S3\\nBronze Layer\\n(Parquet, encrypted)"]
+    LOAD["Matillion S3 Load\\n(COPY INTO)"]
+    RAW["Snowflake\\nRAW_LEARNER_ACTIVITY\\n(Transient Table)"]
+    MERGE["Matillion SQL Merge\\n(UPSERT on activity_id)"]
+    READY["ANALYTICS_READY\\nSilver Layer\\n(with INGESTED_AT, BATCH_ID)"]
+    BI["Downstream\\nBI / AI Teams"]
+    ALERT["SNS / Slack\\nFailure Alerts"]
+
+    SM -->|"inject key"| PY
+    API -->|"paginated chunks"| PY
+    PY -->|"write Parquet chunks"| S3
+    S3 -->|"COPY INTO"| LOAD
+    LOAD --> RAW
+    RAW --> MERGE
+    MERGE --> READY
+    READY --> BI
+    LOAD -->|"on failure"| ALERT
+    PY -->|"on failure"| ALERT
+
+    style S3 fill:#3b5998,color:#fff,stroke:#2d4a7a
+    style READY fill:#2997ff,color:#fff,stroke:#0077ed`;
+---
+
+<CaseStudy
+  title="Designing a Scalable Learner Data Pipeline"
+  subtitle="Diagnosing four critical anti-patterns in a Matillion + Snowflake ETL design and rebuilding it as a robust, idempotent Medallion ELT architecture — with S3 staging, high-water mark incremental loads, and MERGE-based upserts."
+  tags={['Matillion', 'Snowflake', 'AWS S3', 'Python', 'Medallion Architecture', 'FERPA']}
+>
+
+  <div class="cs-section">
+    <h2>The Problem</h2>
+    <p>
+      The Center for Academic Innovation at the University of Michigan processes millions of learner
+      activity events daily from an external LMS API into a Snowflake data warehouse. The goal:
+      an analytics-ready table that downstream BI dashboards and AI/ML models can reliably query.
+    </p>
+    <p>
+      A proposed pipeline design was functional as a proof of concept, but contained four
+      anti-patterns that would cause outages, data loss, or security incidents at production scale
+      (5 million rows per day). This write-up documents the critique and the redesign.
+    </p>
+  </div>
+
+  <div class="cs-section">
+    <h2>The Naive Design & Its Failure Modes</h2>
+    <p>
+      The original proposal loaded all 5M rows into a Matillion in-memory variable, wiped the
+      target table nightly before reinserting, used row-by-row database inserts, and stored API
+      credentials directly inside the script. Each of these decisions creates a distinct failure mode.
+    </p>
+
+    <div class="adr-card">
+      <span class="decision">Anti-Pattern #1 — Memory</span>
+      <h3>Storing 5M rows in a Matillion local variable</h3>
+      <p>
+        Matillion is an orchestration engine, not a data processing engine. Attempting to buffer
+        5 million rows in instance memory will trigger an Out-of-Memory crash, taking down the
+        entire orchestrator — not just this job. The fix is to treat Matillion as a coordinator:
+        the Python script fetches data in paginated chunks and writes each chunk directly to S3
+        as a compressed Parquet file, keeping memory consumption flat regardless of dataset size.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Anti-Pattern #2 — Data Integrity</span>
+      <h3>Truncate-and-load with no rollback</h3>
+      <p>
+        Wiping the target table before each run means a mid-run API failure leaves the
+        <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">ANALYTICS_READY</code>
+        table empty — causing downtime for every dashboard and model that depends on it.
+        It also makes historical trend analysis impossible since yesterday's data is gone.
+        The fix is a Medallion staging pattern: raw data lands in a transient table first,
+        and a <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">MERGE</code>
+        upsert promotes only clean, validated records into the analytics layer.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Anti-Pattern #3 — Performance</span>
+      <h3>Row-by-row inserts via Database Query Component</h3>
+      <p>
+        Snowflake's billing model charges by compute time. Row-by-row inserts create enormous
+        per-transaction overhead and can turn a seconds-long load into a hours-long credit drain.
+        Snowflake's native <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">COPY INTO</code>
+        command — invoked through Matillion's S3 Load component — is purpose-built for bulk
+        ingestion: it parallelizes across Snowflake's virtual warehouse nodes and loads millions
+        of rows in seconds.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Anti-Pattern #4 — Security</span>
+      <h3>Hardcoded API credentials in the script body</h3>
+      <p>
+        Embedding an API secret key inside a Matillion job script exposes it to every user
+        with job-view access and to any log aggregation system. In an educational context,
+        this likely violates FERPA and university data governance standards. The fix is to
+        route credentials through AWS Secrets Manager: the key is encrypted at rest, injected
+        only at runtime, and access is auditable via IAM policy.
+      </p>
+    </div>
+  </div>
+
+  <div class="cs-section">
+    <h2>The Redesigned Architecture</h2>
+    <p>
+      The redesign shifts from a memory-heavy ETL model to a storage-first ELT approach —
+      using S3 as an immutable Bronze layer and Snowflake's own compute for all transformation
+      and merge logic. The pipeline is idempotent: re-running it produces the same result,
+      with no risk of data loss or duplication.
+    </p>
+    <pre class="mermaid" set:text={diagFlow}></pre>
+  </div>
+
+  <div class="cs-section">
+    <h2>Architecture Diagram</h2>
+    <p>
+      The full system view — showing data flow from the external API through Matillion orchestration,
+      S3 Bronze staging, Snowflake bulk load, and MERGE-based promotion to the analytics layer,
+      with IAM and Secrets Manager securing every boundary.
+    </p>
+    <div style="margin-top: 2rem; border-radius: 12px; overflow: hidden; border: 1px solid #2d2d2f;">
+      <img
+        src="/images/learner-pipeline-arch.svg"
+        alt="Medallion ELT architecture diagram showing data flow from external API through Matillion, S3 Bronze layer, Snowflake COPY INTO, and MERGE upsert to the analytics-ready Silver layer"
+        style="width: 100%; display: block; background: #0d0d0e;"
+      />
+    </div>
+  </div>
+
+  <div class="cs-section">
+    <h2>Key Design Decisions</h2>
+
+    <div class="adr-card">
+      <span class="decision">Decision #1 — Extraction Strategy</span>
+      <h3>High-water mark over full historical pull</h3>
+      <p>
+        Instead of pulling all 5M rows every night, the Python script first queries
+        <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">MAX(activity_timestamp)</code>
+        from the analytics table and passes that timestamp to the API as a filter. Only records
+        created or modified since the last successful run are fetched. This reduces API load,
+        ingestion time, and Snowflake compute spend — and makes the pipeline naturally incremental
+        as the dataset grows.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #2 — Storage Format</span>
+      <h3>Parquet on S3 as the Bronze layer</h3>
+      <p>
+        Writing compressed Parquet files to S3 (rather than loading directly into Snowflake)
+        decouples extraction from ingestion. S3 becomes an immutable audit log — if the Snowflake
+        load fails, raw data is preserved and re-loadable with no additional API call. Parquet's
+        columnar compression also reduces S3 storage costs and speeds up
+        <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">COPY INTO</code>
+        throughput compared to CSV.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #3 — Merge Strategy</span>
+      <h3>UPSERT on activity_id for late-arriving updates</h3>
+      <p>
+        Educational platforms routinely backfill or modify historical records — a student's
+        session completion status might be updated days after the activity occurred. A pure
+        INSERT pattern would produce duplicates; a full reload would be expensive and fragile.
+        A
+        <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">MERGE</code>
+        on
+        <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">activity_id</code>
+        handles both cases: it updates existing rows in-place and inserts only net-new records,
+        rewriting only the affected Snowflake micro-partitions.
+      </p>
+    </div>
+
+    <div class="adr-card">
+      <span class="decision">Decision #4 — Observability</span>
+      <h3>Audit columns and alerting on failure paths</h3>
+      <p>
+        Every promoted row is stamped with
+        <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">INGESTED_AT</code>
+        and
+        <code style="color:#2997ff;background:#1c1c1e;padding:2px 6px;border-radius:4px;">BATCH_ID</code>
+        for lineage tracking. Matillion's failure paths are wired to SNS/Slack so any API outage
+        or load error surfaces immediately — preventing the silent data gaps that truncate-and-load
+        pipelines are notorious for hiding until a stakeholder notices stale dashboards.
+      </p>
+    </div>
+  </div>
+
+  <div class="cs-section">
+    <h2>Reflection</h2>
+    <p>
+      The most instructive part of this design exercise was tracing how each anti-pattern compounds
+      the others. A truncate-and-load strategy feels safe until you add the OOM risk: now a crash
+      during extraction leaves the analytics table empty with no recovery path. Fixing memory without
+      fixing the load strategy still leaves you exposed. The Medallion pattern resolves all four
+      failure modes together — extraction, staging, and promotion are independent and individually
+      recoverable.
+    </p>
+    <p>
+      The FERPA dimension reinforced something I've applied in production: security controls
+      aren't optional plumbing to add later. Routing credentials through AWS Secrets Manager from
+      day one costs nothing at small scale and saves significant remediation effort once an audit
+      reveals a hardcoded key in a shared job definition.
+    </p>
+  </div>
+
+</CaseStudy>

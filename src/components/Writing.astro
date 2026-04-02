@@ -34,7 +34,7 @@ import { site } from '../data/site';
       {articles.map((article, i) => (
         <a
           href={article.url}
-          target="_blank"
+          target={article.isInternal ? '_self' : '_blank'}
           class="reveal block glass-card rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 group"
           style={`animation-delay:${i * 0.1}s`}
         >

@@ -22,6 +22,8 @@ export interface Article {
   /** Display read time, e.g. '8 min read' */
   readTime: string;
   url: string;
+  /** If true, opens in the same tab (internal page). Defaults to external/Medium. */
+  isInternal?: boolean;
   /** Short category label shown on the gradient strip */
   tag: string;
   /** Tailwind from-X to-Y gradient classes for the card header */
@@ -30,6 +32,17 @@ export interface Article {
 
 /** Articles — most recent first */
 export const articles: Article[] = [
+  {
+    title: 'Designing a Scalable Learner Data Pipeline: A Medallion Architecture Approach',
+    summary:
+      'A deep-dive into diagnosing four critical anti-patterns in a Matillion + Snowflake ETL design — memory exhaustion, brittle truncate-and-load, slow row-by-row inserts, and hardcoded credentials — and redesigning the pipeline into a robust, idempotent ELT architecture using S3 staging, high-water mark incremental loads, and MERGE-based upserts.',
+    date: 'Mar 2025',
+    readTime: '8 min read',
+    url: '/projects/learner-activity-pipeline',
+    isInternal: true,
+    tag: 'Pipeline Architecture',
+    gradient: 'from-violet-600 to-indigo-700',
+  },
   {
     title:
       'The "Genre Wars": How I Visualized 13 Years of App Store History (Without Crashing Your Browser)',
