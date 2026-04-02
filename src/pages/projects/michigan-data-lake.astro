@@ -1,54 +1,6 @@
 ---
 import CaseStudy from '../../layouts/CaseStudy.astro';
 
-const diagArchitecture = `flowchart TD
-    subgraph Sources ["State & District Data Sources"]
-        A["CEPI\\nXML — annual exports"]
-        B["MISCHOOL / TSDL\\nManual download"]
-        C["MSDS\\nCSV — periodic"]
-        D["District SIS\\nPower School · Synergy · IC"]
-    end
-
-    subgraph Ingestion ["Ingestion Layer"]
-        E["EventBridge\\nScheduled triggers"]
-        F["Manual Data Loader\\nLambda — ad-hoc uploads"]
-    end
-
-    RAW[/"S3 Raw Zone\\nOriginal formats preserved"/]
-
-    subgraph Processing ["Processing — Step Functions orchestrated"]
-        G["Glue DataBrew\\nProfiling + schema validation"]
-        H["Amazon Glue (PySpark)\\nParquet conversion + joins"]
-    end
-
-    subgraph Governance ["Governance Layer"]
-        J["AWS Lake Formation\\nColumn-level access control"]
-        K["Glue Data Catalog\\nSchema registry"]
-    end
-
-    PROC[/"S3 Processed Zone\\nParquet — partitioned by year + district"/]
-
-    subgraph Query ["Query and Visualization"]
-        L["Amazon Athena\\nServerless SQL"]
-        M["Amazon QuickSight\\nExecutive dashboards"]
-        N["Power BI\\nDistrict-level reporting"]
-    end
-
-    subgraph Monitor ["Monitoring"]
-        O["DynamoDB\\nJob run audit log"]
-        P["Amazon SNS\\nSuccess / failure alerts"]
-    end
-
-    A & B & C --> F --> RAW
-    D --> E --> RAW
-    RAW --> G --> H --> PROC
-    PROC --> K --> J --> L
-    L --> M & N
-    H --> O & P
-
-    style PROC fill:#2997ff,color:#fff,stroke:#0077ed`;
-
-
 const diagBefore = `flowchart LR
     A["15+ siloed sources\\nCEPI · MSDS · MISCHOOL\\nDistrict SIS platforms"] -->|"manual export\\nper request"| B["Analyst\\nruns query"]
     B -->|"3 days"| C["Executive\\nreport"]`;
@@ -102,11 +54,35 @@ const diagAfter = `flowchart LR
   <div class="cs-section">
     <h2>System Architecture</h2>
     <p>
-      Data flows from heterogeneous state and district sources through a two-zone S3 lake —
-      raw formats preserved, then transformed to Parquet — governed by Lake Formation and
-      queryable via Athena.
+      Data flows from heterogeneous state and district sources through a three-layer medallion
+      architecture (raw → stage → analytics) — governed by Lake Formation and queryable via Athena.
+      The layers diagram below shows how each AWS service maps to a functional responsibility;
+      the data flow diagram shows how data moves end-to-end from client to business analysts.
     </p>
-    <pre class="mermaid" set:text={diagArchitecture}></pre>
+
+    <!-- Layers architecture — shown first to establish mental model -->
+    <div style="background:rgba(255,255,255,0.015);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:2rem;overflow-x:auto;display:flex;justify-content:center;margin-top:1.5rem;">
+      <img
+        src="/images/ss_AwsDataLakeLayersArchitecture.png"
+        alt="AWS data lake layers architecture — orchestration, data lake storage, data catalog, processing, consumption, governance, utility, and security layers"
+        style="max-width:100%;height:auto;display:block;"
+      />
+    </div>
+    <p style="color:#6e6e73;font-size:0.75rem;text-align:center;margin-top:0.75rem;">
+      Architecture layers — each AWS service mapped to its functional responsibility
+    </p>
+
+    <!-- Full data flow architecture -->
+    <div style="background:rgba(255,255,255,0.015);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:2rem;overflow-x:auto;display:flex;justify-content:center;margin-top:2rem;">
+      <img
+        src="/images/ss_AwsDataLakeArchitecture.png"
+        alt="AWS data lake end-to-end architecture — client ingestion through Lambda, EventBridge, SQS, Step Functions, Glue ETL, S3 raw/stage/analytics buckets, Glue Data Catalog, Athena, and DynamoDB audit log"
+        style="max-width:100%;height:auto;display:block;"
+      />
+    </div>
+    <p style="color:#6e6e73;font-size:0.75rem;text-align:center;margin-top:0.75rem;">
+      End-to-end data flow — from client ingestion to business analyst consumption
+    </p>
   </div>
 
   <div class="cs-section">
