@@ -37,14 +37,11 @@ const diagFlow = `flowchart LR
   <div class="cs-section">
     <h2>The Problem</h2>
     <p>
-      The Center for Academic Innovation at the University of Michigan processes millions of learner
-      activity events daily from an external LMS API into a Snowflake data warehouse. The goal:
-      an analytics-ready table that downstream BI dashboards and AI/ML models can reliably query.
-    </p>
-    <p>
-      A proposed pipeline design was functional as a proof of concept, but contained four
-      anti-patterns that would cause outages, data loss, or security incidents at production scale
-      (5 million rows per day). This write-up documents the critique and the redesign.
+      A common proof-of-concept pipeline design for ingesting 5 million daily learner activity
+      logs from an external LMS API into Snowflake — while functional enough to demonstrate the
+      concept — contains four critical anti-patterns that would cause outages, data loss, or
+      security incidents at production scale. This write-up diagnoses each failure mode and
+      documents the redesign.
     </p>
   </div>
 
